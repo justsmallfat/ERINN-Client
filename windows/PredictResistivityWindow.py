@@ -84,8 +84,15 @@ class ParameterSetWindow(tk.Toplevel):
         comboxlist.grid(row=2, column=1, padx=15, pady=15)
         comboxlist.current(0)  # 選擇第一個
 
+        figs_dirLabel = tk.Label(tab1, text="figs_dir:")
+        figs_dirLabel.grid(row=3, column=0, padx=15, pady=15)
+        figs_dirValue = tk.StringVar(value="../reports/log_transform/testing_figs_raw")  # 窗體自帶的文字，新建一個值
+        figs_dirEntry = tk.Entry(tab1, textvariable=figs_dirValue)  # 初始化
+        figs_dirEntry.grid(row=3, column=1, sticky=tk.W+tk.E, columnspan=2, padx=10, pady=10)
+
+
         btnSend = tk.Button(tab1, text='開始測試', command =lambda:Threader())
-        btnSend.grid(row=2, column=2, padx=15, pady=15)
+        btnSend.grid(row=4, column=0, padx=15, pady=15)
 
 
         import threading
@@ -104,11 +111,12 @@ class ParameterSetWindow(tk.Toplevel):
                 rootSendData.update({'weights_dir': weights_dirValue.get()})
                 rootSendData.update({'predictions_dir': predictions_dirValue.get()})
                 rootSendData.update({'newConfigFileName': comvalue.get()})
-
+                rootSendData.update({'figs_dir':figs_dirValue.get()})
                 sendJson = json.dumps(rootSendData)
                 print('send')
                 threading.Thread.__init__(self)
                 self.daemon = True
+                windowParameterSet.destroy()
                 self.start()
 
             def run(self):
@@ -118,13 +126,13 @@ class ParameterSetWindow(tk.Toplevel):
                 print(headers)
                 print('sendJson:')
                 print(sendJson)
-                windowParameterSet = tk.Toplevel(window)
-                windowParameterSet.geometry('160x90')
-                windowParameterSet.title('模組測試中')
-                selectConfigLabel = tk.Label(windowParameterSet, text="模組測試中...")
-                selectConfigLabel.grid(row=0, column=0, padx=15, pady=15)
+                # windowParameterSet = tk.Toplevel(window)
+                # windowParameterSet.geometry('160x90')
+                # windowParameterSet.title('模組測試中')
+                # selectConfigLabel = tk.Label(windowParameterSet, text="模組測試中...")
+                # selectConfigLabel.grid(row=0, column=0, padx=15, pady=15)
                 r = requests.post(f'{serverURL}/predictResistivity', headers= headers, data=sendJson)
-                windowParameterSet.destroy()
+                # windowParameterSet.destroy()
 
     def preprocessfun(self):
         return "Hello world."

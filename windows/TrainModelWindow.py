@@ -4,6 +4,8 @@ import tkinter as tk
 import requests
 import json
 import datetime
+import os
+import yaml
 from windows.message import TrainModelMessage_1
 from windows.message import TrainModelMessage_2
 from windows.message import TrainModelMessage_3
@@ -28,6 +30,12 @@ class ParameterSetWindow(tk.Toplevel):
         tab_parent.add(tab3, text="Training/Inferring_2")
         tab_parent.add(tab4, text="Training/Inferring_3")
 
+        config_dir = os.path.join('config.yml')
+        stream = open(config_dir, "r")
+        yaml_data = yaml.safe_load(stream)
+        global serverURL
+        serverURL = f'http://{yaml_data["ServerDomainName"]}:{yaml_data["ServerPort"]}'
+
         global rootSendData
 
         #Tab1
@@ -35,19 +43,9 @@ class ParameterSetWindow(tk.Toplevel):
         def getConfigData(configName):
             global rootSendData
             tabOneSendData = {'configFileName': selectConfigComboxlist.get()}
-            print("tabOneSendData")
-            print(tabOneSendData)
-            r = requests.post('http://127.0.0.1:5000/getConfigData', data=tabOneSendData)
-            print("r.text")
-            print(r.text)
+            r = requests.post(f'{serverURL}/getConfigData', data=tabOneSendData)
             rootSendData = json.loads(r.text)
             loadDataRefreshView(rootSendData)
-            print('rootSendData')
-            print(rootSendData)
-
-
-        # def creatMessageView_1():
-        #     GenerateDataMessage_1.ParameterSetWindow(window)
 
         def creatMessageView_1():
             TrainModelMessage_1.ParameterSetWindow(window)
@@ -57,7 +55,7 @@ class ParameterSetWindow(tk.Toplevel):
         selectConfigLabel.grid(row=0, column=0, padx=15, pady=15)
         selectConfigValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         selectConfigComboxlist = ttk.Combobox(tab1, textvariable=selectConfigValue)  # 初始化
-        r = requests.post('http://127.0.0.1:5000/getConfigs')
+        r = requests.post(f'{serverURL}/getConfigs')
         list = r.text
         selectConfigComboxlist["values"] = list.split(',')
         selectConfigComboxlist.grid(row=0, column=1, padx=15, pady=15)
@@ -68,7 +66,7 @@ class ParameterSetWindow(tk.Toplevel):
         selectDataLabel.grid(row=0, column=2, padx=15, pady=15)
         selectDataValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         selectDatalist = ttk.Combobox(tab1, textvariable=selectDataValue)  # 初始化
-        r = requests.post('http://127.0.0.1:5000/getTrainingDataList')
+        r = requests.post(f'{serverURL}/getTrainingDataList')
         list = r.text
         selectDatalist["values"] = list.split(',')
         selectDatalist.grid(row=0, column=3, padx=15, pady=15)
@@ -313,8 +311,10 @@ class ParameterSetWindow(tk.Toplevel):
                 headers = {'Content-Type': 'application/json'}
                 global sendJson
                 rootSendData.update({'newConfigFileName': configNameEntry.get()})
-                rootSendData.update({'raw_data_dir': raw_data_dirPath.get()})
-                rootSendData.update({'processed_data_dir': processed_data_dirPath.get()})
+                rootSendData.update({'trainingStop': 'false'})
+                rootSendData.update({'predictStop': 'false'})
+                rootSendData.update({'raw_data_dir': raw_data_dirEntry.get()})
+                rootSendData.update({'processed_data_dir': processed_data_dirEntry.get()})
                 rootSendData.update({'dataset_dir': "../data/"+selectDatalist.get()})
 
                 rootSendData.update(
@@ -348,8 +348,8 @@ class ParameterSetWindow(tk.Toplevel):
                 )
 
                 rootSendData.update({'custom_NN': custom_NNPath.get()})
-                rootSendData.update({'train_dir': train_dirPath.get()})
-                rootSendData.update({'valid_dir': valid_dirPath.get()})
+                rootSendData.update({'train_dir': train_dirEntry.get()})
+                rootSendData.update({'valid_dir': valid_dirEntry.get()})
                 rootSendData.update({'model_dir': model_dirVar.get()})
                 rootSendData.update({'pre_trained_weights': "0"})
                 if pre_trained_weightsVar.get() :
@@ -367,6 +367,7 @@ class ParameterSetWindow(tk.Toplevel):
                 print('send')
                 threading.Thread.__init__(self)
                 self.daemon = True
+                windowParameterSet.destroy()
                 self.start()
 
             def run(self):
@@ -376,13 +377,7 @@ class ParameterSetWindow(tk.Toplevel):
                 print(headers)
                 print('sendJson:')
                 print(sendJson)
-                windowParameterSet = tk.Toplevel(window)
-                windowParameterSet.geometry('160x90')
-                windowParameterSet.title('模組訓練中')
-                selectConfigLabel = tk.Label(windowParameterSet, text="模組訓練中...")
-                selectConfigLabel.grid(row=0, column=0, padx=15, pady=15)
-                r = requests.post('http://127.0.0.1:5000/training', headers= headers, data=sendJson)
-                windowParameterSet.destroy()
+                r = requests.post(f'{serverURL}/training', headers= headers, data=sendJson)
 
     def preprocessfun(self):
         return "Hello world."

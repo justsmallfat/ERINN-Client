@@ -7,7 +7,6 @@ import datetime
 import os
 import yaml
 
-from windows import LoadingView
 from windows.message import GenerateDataMessage_1
 from windows.message import GenerateDataMessage_2
 from windows.message import GenerateDataMessage_3
@@ -510,11 +509,9 @@ class ParameterSetWindow(tk.Toplevel):
         tempDate = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         # tempTime = datetime.datetime.now().time()
         configNameValue = tk.StringVar(value=tempDate)
+        rootSendData = {'newConfigFileName':configNameValue, 'generateDataStop':'false'}
         configNameEntry = tk.Entry(tab5, textvariable=configNameValue)
         configNameEntry.grid(row=6, column=1, padx=15, pady=15)
-
-        global rootSendData
-
 
 
         import threading
@@ -523,10 +520,11 @@ class ParameterSetWindow(tk.Toplevel):
             global headers
             def __init__(self):
                 print('before')
-                # print(rootSendData)
+                print(rootSendData)
                 global headers
                 headers = {'Content-Type': 'application/json'}
                 rootSendData.update({'newConfigFileName': configNameEntry.get()})
+                rootSendData.update({'generateDataStop': 'false'})
                 rootSendData.update({'dataset_dir': datasetDirEntry.get()})
                 rootSendData.update({'num_samples': numSamplesNum.get()})
                 rootSendData.update({'train_ratio': trainRatioNum.get()})
@@ -587,22 +585,21 @@ class ParameterSetWindow(tk.Toplevel):
                 print('send')
                 threading.Thread.__init__(self)
                 self.daemon = True
+                windowParameterSet.destroy()
                 self.start()
 
             def run(self):
                 global sendJson
                 global headers
-                print('headers:')
-                print(headers)
-                print('sendJson:')
-                print(sendJson)
-                windowParameterSet = tk.Toplevel(window)
-                windowParameterSet.geometry('160x90')
-                windowParameterSet.title('資料生成中')
-                selectConfigLabel = tk.Label(windowParameterSet, text="資料生成中...")
-                selectConfigLabel.grid(row=0, column=0, padx=15, pady=15)
+                # print('sendJson:')
+                # print(sendJson)
                 r = requests.post(f'{serverURL}/generateData', headers= headers, data=sendJson)
-                windowParameterSet.destroy()
+                # windowParameterSet = tk.Toplevel(window)
+                # windowParameterSet.geometry('160x90')
+                # windowParameterSet.title('資料生成中')
+                # selectConfigLabel = tk.Label(windowParameterSet, text="資料生成中...")
+                # selectConfigLabel.grid(row=0, column=0, padx=15, pady=15)
+                # windowParameterSet.destroy()
 
 
         btnSend = tk.Button(tab5, text='傳送參數並生成資料', command =lambda:Threader())
@@ -668,8 +665,6 @@ class ParameterSetWindow(tk.Toplevel):
             global hidden_a_for_b_circleNum
             global hidden_b_for_b_circleNum
             global configNameValue
-            print('rootSendData')
-            print(rootSendData)
 
             datasetDirPath.set(rootSendData['dataset_dir'])
             numSamplesNum.set(rootSendData['num_samples'])

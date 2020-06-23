@@ -1,6 +1,8 @@
 import math
 from  tkinter import ttk
 import tkinter as tk
+from urllib import parse
+
 import requests
 import json
 import io
@@ -51,20 +53,30 @@ class ParameterSetWindow(tk.Toplevel):
             height = int(h*factor)
             return pil_image.resize((width, height), Image.ANTIALIAS)
 
-        def showBigPic(url):
+        def showBigPic(url, sendData):
             print(f'url {url}')
-            ShowBigImageWindow.ParameterSetWindow(window, url)
+
+            ShowBigImageWindow.ParameterSetWindow(window, url, sendData)
 
         #Tab1
         #row1
         def getImagesNames(dirName):
-            sendData = {'configFileName': selectDatalist.get()}
-            r = requests.post(f'{serverURL}/getReportImgsList', data=sendData)
+            sendData = {'figs_dir': selectDatalist.get()}
+            sendJson = json.dumps(sendData)
+            print(f'sendData {sendJson}')
+            r = requests.post(f'{serverURL}/getReportImgsList',
+                                headers= {'Content-Type': 'application/json'},
+                                data=sendJson)
             # 先拿資料
             global imageList
             imageList = r.text.split(',')
             print(len(imageList))
-            rowCount = math.ceil(len(imageList)/5)
+            print(imageList)
+            if(len(imageList)<5):
+                rowCount = 1
+            else:
+                rowCount = math.ceil(len(imageList)/5)
+
             labels = [[tk.Button() for j in xrange(5)] for i in xrange(rowCount)]
             print(len(labels))
             for i in range(rowCount):
@@ -161,11 +173,15 @@ class ParameterSetWindow(tk.Toplevel):
                 rowCount = math.ceil(len(imageList)/5)
                 labels = [[tk.Button() for j in xrange(5)] for i in xrange(rowCount)]
                 print(rootNowIndex)
-                print(rootI)
-                print(rootJ)
+                print(imageList[rootNowIndex])
                 if  rootNowIndex >= len(imageList):return
                 url = f"{serverURL}/uploads/{imageList[rootNowIndex]}"
-                image_bytes = urlopen(url).read()
+                sendData = {'figs_dir': selectDatalist.get()}
+                data = parse.urlencode(sendData).encode()
+                # print(f'sendData {sendJson}')
+                headers= {'Content-Type': 'application/json'}
+                image_bytes = urlopen(url,
+                                      data=data).read()
                 # internal data file
                 data_stream = io.BytesIO(image_bytes)
                 # open as a PIL image object
@@ -180,7 +196,10 @@ class ParameterSetWindow(tk.Toplevel):
                 pil_image_resized = resize(w, h, 200, 100, pil_image)
                 tk_image = ImageTk.PhotoImage(pil_image_resized)
 
-                labels[rootI][rootJ] = tk.Button(frame_Images, image=tk_image, text=imageList[rootNowIndex],command=lambda:showBigPic(url))
+                labels[rootI][rootJ] = tk.Button(frame_Images,
+                                                 image=tk_image,
+                                                 text=imageList[rootNowIndex],
+                                                 command=lambda:showBigPic(url, sendData))
                 labels[rootI][rootJ].image = tk_image
                 labels[rootI][rootJ].grid(row=rootI, column=rootJ, sticky='news')
 

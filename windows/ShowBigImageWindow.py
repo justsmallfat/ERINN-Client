@@ -1,6 +1,8 @@
 import math
 from  tkinter import ttk
 import tkinter as tk
+from urllib import parse
+
 import requests
 import json
 import io
@@ -11,8 +13,7 @@ from PIL import Image, ImageTk
 
 
 class ParameterSetWindow(tk.Toplevel):
-    def __init__(self, window, url):
-
+    def __init__(self, window, url, sendData):
         def resize(w, h, w_box, h_box, pil_image):
             f1 = 1.0*w_box/w # 1.0 forces float division in Python2
             f2 = 1.0*h_box/h
@@ -25,7 +26,9 @@ class ParameterSetWindow(tk.Toplevel):
         windowParameterSet.geometry('800x750')
         windowParameterSet.title(url)
         print(f'ParameterSetWindow {url}')
-        image_bytes = urlopen(url).read()
+        data = parse.urlencode(sendData).encode()
+        image_bytes = urlopen(url,
+                              data=data).read()
         # internal data file
         data_stream = io.BytesIO(image_bytes)
         # open as a PIL image object
