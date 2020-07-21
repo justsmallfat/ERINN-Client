@@ -8,6 +8,7 @@ import json
 import io
 import os
 import yaml
+from functools import partial
 
 from cffi.backend_ctypes import xrange
 from urllib.request import urlopen
@@ -55,7 +56,6 @@ class ParameterSetWindow(tk.Toplevel):
 
         def showBigPic(url, sendData):
             print(f'url {url}')
-
             ShowBigImageWindow.ParameterSetWindow(window, url, sendData)
 
         #Tab1
@@ -72,26 +72,48 @@ class ParameterSetWindow(tk.Toplevel):
             imageList = r.text.split(',')
             print(len(imageList))
             print(imageList)
-            if(len(imageList)<5):
+
+
+            if(len(imageList)<25):
+                totalPageCount = 1
+            else:
+                totalPageCount = math.ceil(len(imageList)/25)
+
+
+            if(totalPageCount<30):
                 rowCount = 1
             else:
-                rowCount = math.ceil(len(imageList)/5)
+                rowCount = math.ceil(totalPageCount/30)
 
-            labels = [[tk.Button() for j in xrange(5)] for i in xrange(rowCount)]
-            print(len(labels))
+            pages_labels = [[tk.Button() for j in xrange(30)]
+                      for i in xrange(rowCount)]
+            print(f'pages_labels {pages_labels}')
+
             for i in range(rowCount):
-                for j in range(5):
-                    nowIndex = i*5+j
-                    print(f'nowIndex {nowIndex}')
-
-                    print(f'j {j}')
-                    if  nowIndex >= len(imageList):break
-                    labels[i][j] = tk.Button(frame_Images, text=imageList[nowIndex])
-                    labels[i][j].grid(row=i, column=j, sticky='news')
-                    Threader(nowIndex,i,j).run()
+                for j in range(30):
+                    nowIndex = i*30+j
+                    print(f'nowIndex {nowIndex} totalPageCount {totalPageCount} j {j} i {i}')
+                    pages_labels[i][j] = tk.Button(frame_pages, text=f"{nowIndex+1}", command=partial(showImagesByPage, nowIndex))
+                    pages_labels[i][j].grid(row=i, column=j, sticky='news')
+                    frame_pages.update_idletasks()
+                    first5columns_width = 750
+                    first5rows_height = 100
+                    frame_canvas_pages.config(width=first5columns_width + vsb_pages.winfo_width(),
+                                        height=first5rows_height)
+                    canvas_pages.config(scrollregion=canvas.bbox("all"))
+                    # Threader(nowIndex,i,j).run()
 
             frame_Images.update_idletasks()
+            first5columns_width = 950
+            first5rows_height = 100
+            frame_canvas.config(width=first5columns_width + vsb.winfo_width(),
+                                height=first5rows_height)
+            canvas.config(scrollregion=canvas.bbox("all"))
 
+
+
+
+            frame_Images.update_idletasks()
             first5columns_width = 750
             first5rows_height = 500
             frame_canvas.config(width=first5columns_width + vsb.winfo_width(),
@@ -100,6 +122,29 @@ class ParameterSetWindow(tk.Toplevel):
             # 讀圖
             print(r.text)
 
+        def showImagesByPage(page):
+            startIndex = (page*25)+1
+            pageImageCount = len(imageList) - startIndex
+            if(pageImageCount < 5):
+                rowCount = 1
+            else:
+                if(pageImageCount>25):
+                    pageImageCount = 25
+
+            rowCount = math.ceil(pageImageCount/5)
+
+            print(f'page {page} startIndex {startIndex} rowCount {rowCount} pageImageCount {pageImageCount}')
+            labels = [[tk.Button() for j in xrange(5)]
+                      for i in xrange(rowCount)]
+            print(len(labels))
+            for i in range(rowCount):
+                for j in range(5):
+                    nowIndex = startIndex + (i*5+j)
+                    print(f'nowIndex {nowIndex} rowCount {rowCount} j {j}')
+                    if  nowIndex >= len(imageList):break
+                    labels[i][j] = tk.Button(frame_Images, text=imageList[nowIndex])
+                    labels[i][j].grid(row=i, column=j, sticky='news')
+                    Threader(nowIndex,i,j).run()
 
         # selectDataLabel = tk.Label(tab1, image=tk_image, text="qq")
         selectDataLabel = tk.Label(tab1, text="選擇資料夾:")
@@ -125,7 +170,7 @@ class ParameterSetWindow(tk.Toplevel):
         frame_canvas.grid_propagate(False)
 
         # Add a canvas in that frame
-        canvas = tk.Canvas(frame_canvas, bg="yellow")
+        canvas = tk.Canvas(frame_canvas)
         canvas.grid(row=0, column=0, sticky="news")
 
         # Link a scrollbar to the canvas
@@ -140,19 +185,32 @@ class ParameterSetWindow(tk.Toplevel):
         # Set the canvas scrolling region
         canvas.config(scrollregion=canvas.bbox("all"))
 
-        # selectModelLabel = tk.Label(tab1, text="選擇模組:")
-        # selectModelLabel.grid(row=0, column=2, padx=15, pady=15)
-        # selectModelValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
-        # selectModellist = ttk.Combobox(tab1, textvariable=selectModelValue)  # 初始化
-        # r = requests.post('http://127.0.0.1:5000/getModelList')
-        # list = r.text
-        # selectModellist["values"] = list.split(',')
-        # selectModellist.grid(row=0, column=3, padx=15, pady=15)
-        # selectModellist.current(0)  # 選擇第一個
 
-        # btnSend = tk.Button(tab1, text='開始測試', command =lambda:Threader())
-        # btnSend.grid(row=2, column=2, padx=15, pady=15)
 
+
+        # Create a frame for the canvas with non-zero row&column weights
+        frame_canvas_pages = tk.Frame(tab1)
+        frame_canvas_pages.grid(row=2, column=0, columnspan=2, pady=(5, 0), sticky='nw')
+        frame_canvas_pages.grid_rowconfigure(0, weight=1)
+        frame_canvas_pages.grid_columnconfigure(0, weight=1)
+        # Set grid_propagate to False to allow 5-by-5 buttons resizing later
+        frame_canvas_pages.grid_propagate(False)
+
+        # Add a canvas in that frame
+        canvas_pages = tk.Canvas(frame_canvas_pages)
+        canvas_pages.grid(row=0, column=0, sticky="news")
+
+        # Link a scrollbar to the canvas
+        vsb_pages = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+        vsb_pages.grid(row=0, column=1, sticky='ns')
+        canvas_pages.configure(yscrollcommand=vsb.set)
+
+        # Create a frame to contain the buttons
+        frame_pages = tk.Frame(canvas_pages)
+        canvas_pages.create_window((0, 0), window=frame_pages, anchor='nw')
+
+        # Set the canvas scrolling region
+        canvas_pages.config(scrollregion=canvas.bbox("all"))
 
 
         import threading

@@ -1,10 +1,12 @@
 import tkinter as tk
 from tkinter import filedialog
-from tkinter import *
 import requests
 import os
 import yaml
 import json
+import threading
+
+from SupportFiles import Tools
 from windows import GenerateDataWindow
 from windows import TrainModelWindow
 from windows import PredictResistivityWindow
@@ -25,19 +27,18 @@ global predictProgressValue
 global timer
 global intervalTime
 intervalTime = 30
-timeout = 3
+timeout = 5
 
+#主功能按鍵
 def parameterSet():
     GenerateDataWindow.ParameterSetWindow(window)
-
 def trainModel():
     TrainModelWindow.ParameterSetWindow(window)
-
 def predictResistivity():
     PredictResistivityWindow.ParameterSetWindow(window)
-
 def showResult():
     ShowResultWindow.ParameterSetWindow(window)
+
 
 def uploadModel():
     window.filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file")
@@ -52,106 +53,74 @@ def uploadModel():
         uploadModeMessageValue.set('上傳成功')
     else:
         uploadModeMessageValue.set('上傳失敗')
-    # files = {'upload_file': open(window.filename,'rb')}
-    # values = {'DB': 'photcat', 'OUT': 'csv', 'SHORT': 'short'}
-    # r = requests.post(f'http://{yaml_data["ServerDomainName"]}:{yaml_data["ServerPort"]}/uploadModel', files=files, data=values)
-
-
     print(r.text)
 
-import threading
+#停止活動
 class Threader(threading.Thread):
     global sendJson
     def __init__(self, actionName, fileName):
         print(actionName)
         threading.Thread.__init__(self)
-        getProgressData()
         global sendJson
         sendJson = json.dumps({'fileName':fileName, 'action':actionName})
         self.daemon = True
         self.start()
-
     def run(self):
         global sendJson
-        global headers
         print('sendJson:')
         print(sendJson)
         r = requests.post(f'http://{yaml_data["ServerDomainName"]}:{yaml_data["ServerPort"]}/stopProcess'
                           , headers= {'Content-Type': 'application/json'}
                           , timeout =10
                           , data=sendJson)
+        getProgressData()
 
-
+#取得進度，Log
 def getProgressData():
     try:
-        config_dir = os.path.join('config.yml')
-        stream = open(config_dir, "r")
-        yaml_data = yaml.safe_load(stream)
-        global rootProgress
+        yaml_data = Tools.getConFigYaml_data('config.yml')
         sendJson = json.dumps(rootProgress["log"])
-        headers = {'Content-Type': 'application/json'}
         print(f'getProgressData() {rootProgress["log"]}')
         r = requests.post(f'http://{yaml_data["ServerDomainName"]}:{yaml_data["ServerPort"]}/getProgress'
-                          , headers = headers
+                          , headers = {'Content-Type': 'application/json'}
                           , timeout = timeout
                           , data=sendJson)
-        print(r.text)
-        rootProgress = json.loads(r.text)
-        loadDataRefreshView()
+        loadDataRefreshView(json.loads(r.text))
     except requests.exceptions.Timeout as e:
-        # Maybe set up for a retry, or continue in a retry loop
-
         initRootProgress('--','Timeout', f'{e}')
         print("Timeout")
     except requests.exceptions.TooManyRedirects as e:
-        # Tell the user their URL was bad and try a different one
         initRootProgress('--','TooManyRedirects', f'{e}')
         print("TooManyRedirects")
     except requests.exceptions.RequestException as e:
-        # catastrophic error. bail.
         initRootProgress('--','RequestException', f'{e}')
         print(f'RequestException {e}')
-        # raise SystemExit(e)
 
-def loadDataRefreshView():
+#更新畫面
+def loadDataRefreshView(progress):
     global rootProgress
-    print(rootProgress)
-    hint = ''
     try:
-        if 'generateData' in rootProgress:
-            generateProgressName.set(rootProgress['generateData']['name'])
-            generateProgressValue.set(rootProgress['generateData']['value'])
-            # if(rootProgress['generateData']['message'] ):
-            #     errorMessageText.insert(1.0, rootProgress['generateData']['message']+'\n')
-            # print(f'generateData {generateProgressValue}')
-        if 'training' in rootProgress:
-            trainingProgressName.set(rootProgress['training']['name'])
-            trainingProgressValue.set(rootProgress['training']['value'])
-            # if(rootProgress['training']['message'] ):
-            #     errorMessageText.insert(1.0, rootProgress['training']['message']+'\n')
-                # hint = rootProgress['training']['message']
-            # traininErrorMessageValue.set(rootProgress['training']['message'])
-            # print(f'training: {trainingProgressValue}')
-        if 'predictResistivity' in rootProgress:
-            predictProgressName.set(rootProgress['predictResistivity']['name'])
-            predictProgressValue.set(rootProgress['predictResistivity']['value'])
-            # if(rootProgress['predictResistivity']['message'] ):
-            #     errorMessageText.insert(1.0, rootProgress['predictResistivity']['message']+'\n')
-                # hint = rootProgress['predictResistivity']['message']
-            # predictErrorMessageValue.set(rootProgress['predictResistivity']['message'])
-            # print(f'predictResistivity {predictProgressValue}')
-        if 'log' in rootProgress:
-            if(rootProgress['log']['name'] ):
+        if 'generateData' in progress:
+            generateProgressName.set(progress['generateData']['name'])
+            generateProgressValue.set(progress['generateData']['value'])
+        if 'training' in progress:
+            trainingProgressName.set(progress['training']['name'])
+            trainingProgressValue.set(progress['training']['value'])
+        if 'predictResistivity' in progress:
+            predictProgressName.set(progress['predictResistivity']['name'])
+            predictProgressValue.set(progress['predictResistivity']['value'])
+        if 'log' in progress:
+            if(progress['log']['name'] ):
                 errorMessageText.insert(1.0,
-                                        f'{rootProgress["log"]["name"]} {rootProgress["log"]["value"]}\n{rootProgress["log"]["message"]}\n')
-
+                                        f'{progress["log"]["name"]} {progress["log"]["value"]}\n{progress["log"]["message"]}\n')
     except:
-        print(rootProgress)
+        print(progress)
     # if hint:
     #     errorMessageText.insert(1.0, hint+'\n')
 
     window.update_idletasks()
 
+#初始化資料
 def initRootProgress(name, value, message):
     global rootProgress
     rootProgress = {}
@@ -159,10 +128,9 @@ def initRootProgress(name, value, message):
     rootProgress['training'] = {'name':name,'value':value, 'message':message}
     rootProgress['predictResistivity'] = {'name':name,'value':value, 'message':message}
     rootProgress['log'] = {'name':'','value':'', 'message':''}
-    loadDataRefreshView()
+    loadDataRefreshView(rootProgress)
 
 class perpetualTimer():
-
     def __init__(self,t,hFunction):
         self.t=t
         self.hFunction = hFunction
@@ -182,22 +150,22 @@ def saveConfig():
     f.write(f"ServerDomainName : {configDomainNameEntry.get()}\n")
     f.write(f"ServerPort : {configPoartEntry.get()}\n")
     f.close()
-    getProgressData()
+    initTimmer()
 
+mainWindowTimer = perpetualTimer(intervalTime, getProgressData)
 def initTimmer():
     getProgressData()
     global mainWindowTimer
-    mainWindowTimer = perpetualTimer(intervalTime,getProgressData)
+    mainWindowTimer.cancel()
+    mainWindowTimer = perpetualTimer(intervalTime, getProgressData)
     mainWindowTimer.start()
 
-nowRow = 0
-
+# 讀取config檔
 errorMessageText = tk.Text(window, height=10, width=40)
 try:
-    config_dir = os.path.join('config.yml')
-    stream = open(config_dir, "r")
-    yaml_data = yaml.safe_load(stream)
+    yaml_data = Tools.getConFigYaml_data('config.yml')
 except OSError as e:
+    config_dir = os.path.join('config.yml')
     print(f"OSError {e}")
     f = open(config_dir, "w")
     f.write("ServerDomainName : 192.168.3.11\n"
@@ -210,9 +178,7 @@ except Exception as e:
     errorMessageText.insert(1.0,"ReadConfigError")
     print(f"ReadConfigError {e}")
 
-
-# print(yaml_data['ServerDomainName'])
-
+nowRow = 0
 parameterSetMsgLabel = tk.Label(window, text="伺服器Domain")
 parameterSetMsgLabel.grid(row=nowRow, column=0, columnspan=3, sticky=tk.W, padx=10, pady=10)
 configDomainNameStr = tk.StringVar(value=yaml_data['ServerDomainName'])
@@ -227,7 +193,6 @@ btnParameterSet = tk.Button(window, text='連接', command=saveConfig)
 btnParameterSet.grid(row=nowRow, column=4, padx=10, pady=10)
 
 nowRow = nowRow+1
-
 btnParameterSet = tk.Button(window, text='生成資料', command=parameterSet)
 btnParameterSet.grid(row=nowRow, column=0, padx=10, pady=10)
 parameterSetMsgLabel = tk.Label(window, text="可以讀去過往紀錄的參數，也可修正參數，並用設定的參數生成虛擬數據，以用來訓練模型。")
@@ -236,7 +201,6 @@ parameterSetMsgLabel = tk.Label(window, text="日誌")
 parameterSetMsgLabel.grid(row=nowRow, column=4, padx=10, pady=10)
 
 nowRow = nowRow+1
-
 btnTrainModel = tk.Button(window, text='訓練模型', command=trainModel)
 btnTrainModel.grid(row=nowRow, column=0, padx=10, pady=10)
 trainModelMsgLabel = tk.Label(window, text="選擇之前所產數據，並設定訓練參數，以用來訓練模型。")
@@ -245,7 +209,6 @@ generateErrorMessageValue = tk.StringVar()
 errorMessageText.grid(row=nowRow, rowspan=3, column=4, sticky=tk.W, padx=10, pady=10)
 
 nowRow = nowRow+1
-
 btnTestModel = tk.Button(window, text='測試模型', command=predictResistivity)
 btnTestModel.grid(row=nowRow, column=0, padx=10, pady=10)
 trainModelMsgLabel = tk.Label(window, text="選擇模型，測試模型準確度。")
