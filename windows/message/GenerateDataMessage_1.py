@@ -60,5 +60,27 @@ class ParameterSetWindow(tk.Toplevel):
         numKGLabelMsg = tk.Label(windowParameterSet, text="control the number of wave number (k) and weight (g).")
         numKGLabelMsg.grid(row=9, column=1, padx=10, pady=10)
 
+
+        selectConfigLabel = tk.Label(windowParameterSet, text="nx:")
+        selectConfigLabel.grid(row=10, column=0, padx=10, pady=10)
+        selectConfigLabelMsg = tk.Label(windowParameterSet, text="number of mesh in the x direction.")
+        selectConfigLabelMsg.grid(row=10, column=1, padx=10, pady=10)
+
+        #row2
+        datasetDirLabel = tk.Label(windowParameterSet, text="nz")
+        datasetDirLabel.grid(row=11, column=0, padx=10, pady=10)
+        datasetDirLabelMsg = tk.Label(windowParameterSet, text="number of mesh in the z direction.")
+        datasetDirLabelMsg.grid(row=11, column=1, padx=10, pady=10)
+
+        numSamplesLabel = tk.Label(windowParameterSet, text="x_kernel_size")
+        numSamplesLabel.grid(row=12, column=0, padx=10, pady=10)
+        numSamplesLabelMsg = tk.Label(windowParameterSet, text="Kernel size in the x direction.")
+        numSamplesLabelMsg.grid(row=12, column=1, padx=10, pady=10)
+
+        trainRatioLabel = tk.Label(windowParameterSet, text="z_kernel_size")
+        trainRatioLabel.grid(row=13, column=0, padx=10, pady=10)
+        trainRatioLabelMsg = tk.Label(windowParameterSet, text="Kernel size in the z direction.")
+        trainRatioLabelMsg.grid(row=13, column=1, padx=10, pady=10)
+
     def fun(self):
         return "Hello world."

@@ -38,6 +38,9 @@ class ParameterSetWindow(tk.Toplevel):
 
         global rootSendData
 
+        global photo
+        photo = tk.PhotoImage(file ='D:/kevin_paper/project/ERINN-Client/question.gif')
+
         #Tab1
         #row1
         def getConfigData(configName):
@@ -49,8 +52,8 @@ class ParameterSetWindow(tk.Toplevel):
 
         def creatMessageView_1():
             TrainModelMessage_1.ParameterSetWindow(window)
-        btnParameterSet = tk.Button(tab1, text='？', command=creatMessageView_1)
-        btnParameterSet.place(width = 40, height = 40, x = 950, y = 0, anchor = "nw")
+        btnParameterSet = tk.Button(tab1, image = photo, command=creatMessageView_1)
+        btnParameterSet.place(width = 50, height = 50, x = 940, y = 10, anchor = "nw")
         selectConfigLabel = tk.Label(tab1, text="選擇設定檔:")
         selectConfigLabel.grid(row=0, column=0, padx=15, pady=15)
         selectConfigValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
@@ -125,13 +128,29 @@ class ParameterSetWindow(tk.Toplevel):
         #row1
         def creatMessageView_2():
             TrainModelMessage_2.ParameterSetWindow(window)
-        btnParameterSet = tk.Button(tab2, text='？', command=creatMessageView_2)
-        btnParameterSet.place(width = 40, height = 40, x = 950, y = 0, anchor = "nw")
+        btnParameterSet = tk.Button(tab2, image = photo, command=creatMessageView_2)
+        btnParameterSet.place(width = 50, height = 50, x = 940, y = 10, anchor = "nw")
         custom_NNLabel = tk.Label(tab2, text="custom_NN")
         custom_NNLabel.grid(row=0, column=0,  padx=15, pady=15)
-        custom_NNPath = tk.StringVar(value="<module 'my_model' from '../config/model.py'>")
-        custom_NNEntry = tk.Entry(tab2, textvariable=custom_NNPath)
-        custom_NNEntry.grid(row=0, column=1, sticky=tk.EW, columnspan=3, padx=5, pady=5)
+        def setCustom_NN(configName):
+            global custom_NNPath
+            custom_NNPath = tk.StringVar(value=f"<module 'my_model' from '../config/{custom_NNPathValue.get()}'>")
+
+        custom_NNPathValue = tk.StringVar(value='model.py')  # 窗體自帶的文字，新建一個值
+        custom_NNPathComboxlist = ttk.Combobox(tab2, textvariable=custom_NNPathValue)  # 初始化
+        r = requests.post(f'{serverURL}/getDLModels')
+        list = r.text
+        custom_NNPathComboxlist["values"] = list.split(',')
+        custom_NNPathComboxlist.grid(row=0, column=1, padx=15, pady=15)
+        custom_NNPathComboxlist.current(0)  # 選擇第一個
+        custom_NNPathComboxlist.bind("<<ComboboxSelected>>",setCustom_NN)
+
+        custom_NNPath = tk.StringVar(value=f"<module 'my_model' from '../config/{custom_NNPathValue.get()}'>")
+
+
+        # custom_NNPath = tk.StringVar(value="<module 'my_model' from '../config/model.py'>")
+        # custom_NNEntry = tk.Entry(tab2, textvariable=custom_NNPath)
+        # custom_NNEntry.grid(row=0, column=1, sticky=tk.EW, columnspan=3, padx=5, pady=5)
 
         #row2
         train_dirLabel = tk.Label(tab2, text="train_dir")
@@ -164,8 +183,8 @@ class ParameterSetWindow(tk.Toplevel):
         #row1
         def creatMessageView_3():
             TrainModelMessage_3.ParameterSetWindow(window)
-        btnParameterSet = tk.Button(tab3, text='？', command=creatMessageView_3)
-        btnParameterSet.place(width = 40, height = 40, x = 950, y = 0, anchor = "nw")
+        btnParameterSet = tk.Button(tab3, image = photo, command=creatMessageView_3)
+        btnParameterSet.place(width = 50, height = 50, x = 940, y = 10, anchor = "nw")
         preprocess_generatorLabel = tk.Label(tab3, text="preprocess_generator")
         preprocess_generatorLabel.grid(row=0, column=0, columnspan=6, padx=15, pady=15, sticky=tk.W)
 
@@ -347,7 +366,7 @@ class ParameterSetWindow(tk.Toplevel):
                     }
                 )
 
-                rootSendData.update({'custom_NN': custom_NNPath.get()})
+                rootSendData.update({'custom_NN': f"<module 'my_model' from '../config/{custom_NNPathValue.get()}'>"})
                 rootSendData.update({'train_dir': train_dirEntry.get()})
                 rootSendData.update({'valid_dir': valid_dirEntry.get()})
                 rootSendData.update({'model_dir': model_dirVar.get()})

@@ -31,6 +31,7 @@ timeout = 5
 
 #主功能按鍵
 def parameterSet():
+
     GenerateDataWindow.ParameterSetWindow(window)
 def trainModel():
     TrainModelWindow.ParameterSetWindow(window)
@@ -189,6 +190,7 @@ parameterSetMsgLabel.grid(row=nowRow, column=2, columnspan=3, sticky=tk.W, padx=
 configPoartStr = tk.StringVar(value=yaml_data['ServerPort'])
 configPoartEntry = tk.Entry(window, textvariable=configPoartStr)
 configPoartEntry.grid(row=nowRow, column=3, padx=10, pady=10)
+photo = tk.PhotoImage(file ='D:/kevin_paper/project/ERINN-Client/question.gif')
 btnParameterSet = tk.Button(window, text='連接', command=saveConfig)
 btnParameterSet.grid(row=nowRow, column=4, padx=10, pady=10)
 

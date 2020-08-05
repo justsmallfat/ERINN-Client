@@ -16,7 +16,6 @@ class ParameterSetWindow(tk.Toplevel):
         tab_parent.pack(expand=2, fill='both')
 
         tab1 = ttk.Frame(tab_parent)
-        tab2 = ttk.Frame(tab_parent)
         config_dir = os.path.join('config.yml')
         stream = open(config_dir, "r")
         yaml_data = yaml.safe_load(stream)
@@ -24,7 +23,6 @@ class ParameterSetWindow(tk.Toplevel):
         serverURL = f'http://{yaml_data["ServerDomainName"]}:{yaml_data["ServerPort"]}'
 
         tab_parent.add(tab1, text="Preprocess")
-        tab_parent.add(tab2, text="PredictResistivity/Inferring_1")
 
         global rootSendData
         data = {}

@@ -43,6 +43,8 @@ class ParameterSetWindow(tk.Toplevel):
         global serverURL
         serverURL = f'http://{yaml_data["ServerDomainName"]}:{yaml_data["ServerPort"]}'
 
+        global photo
+        photo = tk.PhotoImage(file ='D:/kevin_paper/project/ERINN-Client/question.gif')
         global rootSendData
         # values
         global datasetDirPath
@@ -109,26 +111,48 @@ class ParameterSetWindow(tk.Toplevel):
             rootSendData = json.loads(r.text)
             loadDataRefreshView()
 
-        def getBoardFrame(boardType, a, b):
+        def getBoardFrame(boardType, scaleType, a, b):
             f = Figure(figsize=(3,3), dpi=50)
-            print(f'boardType = {boardType }')
+            print(f'boardType = {boardType } a {a} b {b}')
+
+            x_axis_size = int(abs(b-a+1))
+            if x_axis_size<50:
+                x_axis_size = 50
+            # x_axis = linspace(a, b, x_axis_size)
+            x_axis = linspace(a, b, x_axis_size)
             if 'normal'==boardType:
                 print(f'normal')
-                step = (a-b)/100
-                x_axis = arange(b, a, step)
-                mid = (b+a)/2
-                y_axis = norm.pdf(x_axis, mid)
+                x_axis = linspace(0, a*2, x_axis_size)
+                if scaleType == 'linear':
+                    _a = (0 - a) / b
+                    _b = (np.inf - a) / b
+                    pd = truncnorm(_a, _b, loc=a, scale=b)
+                elif scaleType == 'log10':
+                    pd = norm(loc=a, scale=b)
+                else:
+                    raise ValueError('You did not input enough or correct keyword argument.')
+
+
+                y_axis = pd.pdf(x_axis)
+
+                # mid = (b+a)/2
+                # y_axis = norm.pdf(x_axis, mid)
                 # plot data
                 pyplot = f.add_subplot(111)
-                print(f'x_axis = {x_axis } y_axis {y_axis} a {a} b {b}')
+                # print(f'x_axis = {x_axis } y_axis {y_axis} a {a} b {b}')
                 pyplot.plot(x_axis, y_axis)
             else:
                 print(f'uniform')
-                x_axis = linspace(b, a)
-                y_axis = uniform.pdf(x_axis, scale=a)
+                # x_axis = linspace(uniform.ppf(a), uniform.ppf(b), x_axis_size)
+                if a>b:
+                    return f
+
+                pd = uniform(a, b-a)
+                y_axis = pd.pdf(x_axis)
                 pyplot = f.add_subplot(111)
                 pyplot.plot(x_axis, y_axis)
-                r = uniform.rvs(x_axis)
+                r = pd.rvs(size=x_axis_size)
+                # print(f'x_axis = {x_axis } y_axis {y_axis} a {a} b {b} r {r}')
                 pyplot.hist(r, density=True, histtype='stepfilled', alpha=0.2)
                 pyplot.legend(loc='best', frameon=False)
                 # x_axis = linspace(bBackgroundNum.get(), aBackgroundNum.get(), 100)
@@ -137,57 +161,202 @@ class ParameterSetWindow(tk.Toplevel):
                 # pyplot.plot(x_axis, y_axis)
             return f
 
-        def reLoadView(qq):
-            print(f"reLoadView")
+        def reLoadView(self):
+            print(f"reLoadView {useHiddenBackgroundValue}")
             global rootSendData
             tabIndex = 4
             rowIndex = 7
 
             rowIndex = rowIndex + 1
-            BackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="scale_background")
-            BackgroundLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
+            BackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="background")
+            BackgroundLabel.grid(row=rowIndex, column=1, padx=5, pady=5)
+            rectLabel = tk.Label(tabs[tabIndex]["tab"], text="rect")
+            rectLabel.grid(row=rowIndex, column=2, padx=5, pady=5)
+            circleLabel = tk.Label(tabs[tabIndex]["tab"], text="circle")
+            circleLabel.grid(row=rowIndex, column=3, padx=5, pady=5)
+
+            rowIndex = rowIndex + 1
+            titleLabel = tk.Label(tabs[tabIndex]["tab"], text="scaleType")
+            titleLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
             BackgroundValueLabel = tk.Label(tabs[tabIndex]["tab"], text=scaleBackgroundValue.get())
             BackgroundValueLabel.grid(row=rowIndex, column=1, padx=5, pady=5)
+            BackgroundValueLabel = tk.Label(tabs[tabIndex]["tab"], text=scale_rectValue.get())
+            BackgroundValueLabel.grid(row=rowIndex, column=2, padx=5, pady=5)
+            BackgroundValueLabel = tk.Label(tabs[tabIndex]["tab"], text=scale_circleValue.get())
+            BackgroundValueLabel.grid(row=rowIndex, column=3, padx=5, pady=5)
 
             rowIndex = rowIndex + 1
-            pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="background")
-            pdfBackgroundLabel.grid(row=rowIndex, column=0, columnspan=2, padx=15, pady=15)
-            pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="rectangle")
-            pdfBackgroundLabel.grid(row=rowIndex, column=2, columnspan=2, padx=15, pady=15)
-            pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="circle")
-            pdfBackgroundLabel.grid(row=rowIndex, column=4, columnspan=2, padx=15, pady=15)
-            # pdfBackgroundValue
-
-            rowIndex = rowIndex + 1
-            pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="pdf background")
-            pdfBackgroundLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-            pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="use hidden background")
-            pdfBackgroundLabel.grid(row=rowIndex, column=1, padx=15, pady=15)
-            pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="pdf pdf_rect")
-            pdfBackgroundLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-            pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="use hidden pdf_rect")
-            pdfBackgroundLabel.grid(row=rowIndex, column=3, padx=15, pady=15)
-            pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="pdf circle")
-            pdfBackgroundLabel.grid(row=rowIndex, column=4, padx=15, pady=15)
-            pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="use hidden circle")
-            pdfBackgroundLabel.grid(row=rowIndex, column=5, padx=15, pady=15)
-
-            rowIndex = rowIndex + 1
-            f = getBoardFrame(pdfBackgroundValue.get(), aBackgroundNum.get(), bBackgroundNum.get())
-            canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=rowIndex, column=0, padx=5, pady=5)
-
-            f = getBoardFrame(hiddenPdfBackgroundValue.get(), hidden_b_for_a_backgroundNum.get(), hidden_a_for_a_backgroundNum.get())
+            titleLabel = tk.Label(tabs[tabIndex]["tab"], text="pdf")
+            titleLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
+            f = getBoardFrame(pdfBackgroundValue.get(), scaleBackgroundValue.get(), aBackgroundNum.get(), bBackgroundNum.get())
             canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
             canvas.draw()
             canvas.get_tk_widget().grid(row=rowIndex, column=1, padx=5, pady=5)
+            f = getBoardFrame(pdf_rectValue.get(), scale_rectValue.get(), a_rectNum.get(), b_rectNum.get())
+            canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+            canvas.draw()
+            canvas.get_tk_widget().grid(row=rowIndex, column=2, padx=5, pady=5)
+            f = getBoardFrame(pdf_circleValue.get(), scale_circleValue.get(), a_circleNum.get(), b_circleNum.get())
+            canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+            canvas.draw()
+            canvas.get_tk_widget().grid(row=rowIndex, column=3, padx=5, pady=5)
+
+            rowIndex = rowIndex + 1
+            titleLabel = tk.Label(tabs[tabIndex]["tab"], text="Use Hidden for a")
+            titleLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
+            if useHiddenBackgroundValue.get():
+                f = getBoardFrame(hiddenPdfBackgroundValue.get(), hiddenPdfBackgroundValue.get(), hidden_a_for_a_backgroundNum.get(), hidden_b_for_a_backgroundNum.get())
+                canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=rowIndex, column=1, padx=5, pady=5)
+            else:
+                f = Figure(figsize=(3,3), dpi=50)
+                canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=rowIndex, column=1, padx=5, pady=5)
+                messageLabel = tk.Label(tabs[tabIndex]["tab"], text="No use")
+                messageLabel.grid(row=rowIndex, column=1, padx=15, pady=15)
+            if useHiddenRectValue.get():
+                f = getBoardFrame(hidden_pdf_rectValue.get(), hidden_pdf_rectValue.get(), hidden_a_for_a_rectNum.get(), hidden_b_for_a_rectNum.get())
+                canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=rowIndex, column=2, padx=5, pady=5)
+            else:
+                f = Figure(figsize=(3,3), dpi=50)
+                canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=rowIndex, column=2, padx=5, pady=5)
+                messageLabel = tk.Label(tabs[tabIndex]["tab"], text="No use")
+                messageLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
+            if useHiddencircleValue.get():
+                f = getBoardFrame(hidden_pdf_circleValue.get(), hidden_pdf_circleValue.get(), hidden_a_for_a_circleNum.get(), hidden_b_for_a_circleNum.get())
+                canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=rowIndex, column=3, padx=5, pady=5)
+            else:
+                f = Figure(figsize=(3,3), dpi=50)
+                canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=rowIndex, column=3, padx=5, pady=5)
+                messageLabel = tk.Label(tabs[tabIndex]["tab"], text="No use")
+                messageLabel.grid(row=rowIndex, column=3, padx=15, pady=15)
+
+
+            rowIndex = rowIndex + 1
+            titleLabel = tk.Label(tabs[tabIndex]["tab"], text="Use Hidden for b")
+            titleLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
+            if useHiddenBackgroundValue.get():
+                f = getBoardFrame(hiddenPdfBackgroundValue.get(), hiddenPdfBackgroundValue.get(), hidden_a_for_b_backgroundNum.get(), hidden_b_for_b_backgroundNum.get())
+                canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=rowIndex, column=1, padx=5, pady=5)
+            else:
+                f = Figure(figsize=(3,3), dpi=50)
+                canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=rowIndex, column=1, padx=5, pady=5)
+                messageLabel = tk.Label(tabs[tabIndex]["tab"], text="No use")
+                messageLabel.grid(row=rowIndex, column=1, padx=15, pady=15)
+            if useHiddenRectValue.get():
+                f = getBoardFrame(hidden_pdf_rectValue.get(), hidden_pdf_rectValue.get(), hidden_a_for_b_rectNum.get(), hidden_b_for_b_rectNum.get())
+                canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=rowIndex, column=2, padx=5, pady=5)
+            else:
+                f = Figure(figsize=(3,3), dpi=50)
+                canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=rowIndex, column=2, padx=5, pady=5)
+                messageLabel = tk.Label(tabs[tabIndex]["tab"], text="No use")
+                messageLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
+            if useHiddencircleValue.get():
+                f = getBoardFrame(hidden_pdf_circleValue.get(), hidden_pdf_circleValue.get(), hidden_b_for_a_circleNum.get(), hidden_b_for_b_circleNum.get())
+                canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=rowIndex, column=3, padx=5, pady=5)
+            else:
+                f = Figure(figsize=(3,3), dpi=50)
+                canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=rowIndex, column=3, padx=5, pady=5)
+                messageLabel = tk.Label(tabs[tabIndex]["tab"], text="No use")
+                messageLabel.grid(row=rowIndex, column=3, padx=15, pady=15)
+
+
+            # BackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="scale_background")
+            # BackgroundLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
+            # BackgroundValueLabel = tk.Label(tabs[tabIndex]["tab"], text=scaleBackgroundValue.get())
+            # BackgroundValueLabel.grid(row=rowIndex, column=1, padx=5, pady=5)
+            #
+            # rowIndex = rowIndex + 1
+            # pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="background")
+            # pdfBackgroundLabel.grid(row=rowIndex, column=0, columnspan=2, padx=15, pady=15)
+            # pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="rectangle")
+            # pdfBackgroundLabel.grid(row=rowIndex, column=2, columnspan=2, padx=15, pady=15)
+            # pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="circle")
+            # pdfBackgroundLabel.grid(row=rowIndex, column=4, columnspan=2, padx=15, pady=15)
+            # pdfBackgroundValue
+
+            # rowIndex = rowIndex + 1
+            # pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="pdf background")
+            # pdfBackgroundLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
+            # pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden background for a")
+            # pdfBackgroundLabel.grid(row=rowIndex, column=1, padx=15, pady=15)
+            # pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden background for b")
+            # pdfBackgroundLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
+            # pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="use hidden pdf_rect")
+            # pdfBackgroundLabel.grid(row=rowIndex, column=3, padx=15, pady=15)
+            # pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="pdf circle")
+            # pdfBackgroundLabel.grid(row=rowIndex, column=4, padx=15, pady=15)
+            # pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="use hidden circle")
+            # pdfBackgroundLabel.grid(row=rowIndex, column=5, padx=15, pady=15)
+
+            # rowIndex = rowIndex + 1
+            # f = getBoardFrame(pdfBackgroundValue.get(), aBackgroundNum.get(), bBackgroundNum.get())
+            # canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+            # canvas.draw()
+            # canvas.get_tk_widget().grid(row=rowIndex, column=0, padx=5, pady=5)
+
+
+            # rowIndex = rowIndex + 1
+
+            # if num_rectNum.get()>0:
+            #     f = getBoardFrame(pdf_rectValue.get(), a_rectNum.get(), b_rectNum.get())
+            #     canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+            #     canvas.draw()
+            #     canvas.get_tk_widget().grid(row=rowIndex, column=0, padx=5, pady=5)
+            #     if useHiddenRectValue.get():
+            #         f = getBoardFrame(hidden_pdf_rectValue.get(), hidden_a_for_a_rectNum.get(), hidden_b_for_a_rectNum.get())
+            #         canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+            #         canvas.draw()
+            #         canvas.get_tk_widget().grid(row=rowIndex, column=1, padx=5, pady=5)
+            #         f = getBoardFrame(hidden_pdf_rectValue.get(), hidden_a_for_b_rectNum.get(), hidden_b_for_b_rectNum.get())
+            #         canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+            #         canvas.draw()
+            #         canvas.get_tk_widget().grid(row=rowIndex, column=2, padx=5, pady=5)
+            #     else:
+            #         f = Figure(figsize=(3,3), dpi=50)
+            #         canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+            #         canvas.draw()
+            #         canvas.get_tk_widget().grid(row=rowIndex, column=1, padx=5, pady=5)
+            #         messageLabel = tk.Label(tabs[tabIndex]["tab"], text="No use")
+            #         messageLabel.grid(row=rowIndex, column=1, padx=15, pady=15)
+            #         canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
+            #         canvas.draw()
+            #         canvas.get_tk_widget().grid(row=rowIndex, column=2, padx=5, pady=5)
+            #         messageLabel = tk.Label(tabs[tabIndex]["tab"], text="No use")
+            #         messageLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
+            # else:
+
+
+
 
 
             # print(f'x_axis = {x_axis } y_axis {y_axis} aBackgroundNum {aBackgroundNum.get()} bBackgroundNum {bBackgroundNum.get()}')
 
 
 
+        # tab_parent.bind("<<NotebookTabChanged>>", reLoadView)
         def creatMessageView_1():
             GenerateDataMessage_1.ParameterSetWindow(window)
         def creatMessageView_3():
@@ -200,8 +369,8 @@ class ParameterSetWindow(tk.Toplevel):
         #Tab1
         tabIndex = 0
         rowIndex = 0
-        btnParameterSet = tk.Button(tabs[tabIndex]["tab"], text='？', command=creatMessageView_1)
-        btnParameterSet.place(width = 40, height = 40, x = 950, y = 0, anchor = "nw")
+        btnParameterSet = tk.Button(tabs[tabIndex]["tab"], image = photo, command=creatMessageView_1)
+        btnParameterSet.place(width = 50, height = 50, x = 940, y = 10, anchor = "nw")
         selectConfigLabel = tk.Label(tabs[tabIndex]["tab"], text="選擇設定檔:")
         selectConfigLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
         comvalue = tk.StringVar()  # 窗體自帶的文字，新建一個值
@@ -301,14 +470,15 @@ class ParameterSetWindow(tk.Toplevel):
 
         tabIndex = tabIndex + 1
         rowIndex = 0
-        btnParameterSet = tk.Button(tabs[tabIndex]["tab"], text='？', command=creatMessageView_3)
-        btnParameterSet.place(width = 40, height = 40, x = 950, y = 0, anchor = "nw")
+        btnParameterSet = tk.Button(tabs[tabIndex]["tab"], image = photo, command=creatMessageView_3)
+        btnParameterSet.place(width = 50, height = 50, x = 940, y = 10, anchor = "nw")
         scaleBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="Scale background")
         scaleBackgroundLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
         scaleBackgroundValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         scaleBackgroundBoxList = ttk.Combobox(tabs[tabIndex]["tab"], textvariable=scaleBackgroundValue)  # 初始化
         scaleBackgroundBoxList["values"] = ["linear", "log10"]
         scaleBackgroundBoxList.grid(row=rowIndex, column=1, padx=15, pady=15)
+        scaleBackgroundBoxList.bind("<<ComboboxSelected>>", reLoadView)
         scaleBackgroundBoxList.current(0)  # 選擇第一個
         pdfBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="pdf background")
         pdfBackgroundLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
@@ -341,40 +511,40 @@ class ParameterSetWindow(tk.Toplevel):
         hiddenPdfBackgroundBoxList.current(0)  # 選擇第一個
         hiddenPdfBackgroundBoxList.bind("<<ComboboxSelected>>", reLoadView)
         useHiddenBackgroundValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
-        c1 = tk.Checkbutton(tabs[tabIndex]["tab"], text='use_hidden_background', variable=useHiddenBackgroundValue, onvalue=1, offvalue=0)
+        hidden_a_for_a_backgroundNum = tk.DoubleVar(value=0.001)
+        hidden_b_for_a_backgroundNum = tk.DoubleVar(value=1000)
+        hidden_a_for_b_backgroundNum = tk.DoubleVar(value=0.001)
+        hidden_b_for_b_backgroundNum = tk.DoubleVar(value=100)
+        c1 = tk.Checkbutton(tabs[tabIndex]["tab"], text='use_hidden_background', variable=useHiddenBackgroundValue, command=lambda:reLoadView(self), onvalue=1, offvalue=0)
         c1.grid(row=rowIndex, column=2, padx=15, pady=15)
 
         rowIndex = rowIndex + 1
         hidden_a_for_a_backgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_a_for_a_rect:")
         hidden_a_for_a_backgroundLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-        hidden_a_for_a_backgroundNum = tk.DoubleVar(value=0.001)
         hidden_a_for_a_backgroundEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_a_for_a_backgroundNum)
         hidden_a_for_a_backgroundEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
         hidden_b_for_a_backgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_b_for_a_rect:")
         hidden_b_for_a_backgroundLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        hidden_b_for_a_backgroundNum = tk.DoubleVar(value=1000)
         hidden_b_for_a_backgroundEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_b_for_a_backgroundNum)
         hidden_b_for_a_backgroundEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
         rowIndex = rowIndex + 1
         hidden_a_for_b_backgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_a_for_b_rect:")
         hidden_a_for_b_backgroundLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-        hidden_a_for_b_backgroundNum = tk.DoubleVar(value=0.001)
         hidden_a_for_b_backgroundEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_a_for_b_backgroundNum)
         hidden_a_for_b_backgroundEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
         hidden_b_for_b_backgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_b_for_b_rect:")
         hidden_b_for_b_backgroundLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        hidden_b_for_b_backgroundNum = tk.DoubleVar(value=100)
         hidden_b_for_b_backgroundEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_b_for_b_backgroundNum)
         hidden_b_for_b_backgroundEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
         tabIndex = tabIndex + 1
         rowIndex = 0
-        btnParameterSet = tk.Button(tabs[tabIndex]["tab"], text='？', command=creatMessageView_4)
-        btnParameterSet.place(width = 40, height = 40, x = 950, y = 0, anchor = "nw")
+        btnParameterSet = tk.Button(tabs[tabIndex]["tab"], image = photo, command=creatMessageView_4)
+        btnParameterSet.place(width = 50, height = 50, x = 940, y = 10, anchor = "nw")
         num_rectLabel = tk.Label(tabs[tabIndex]["tab"], text="num_rect:")
         num_rectLabel.grid(row=0, column=0, padx=15, pady=15)
-        num_rectNum = tk.StringVar(value=1)
+        num_rectNum = tk.IntVar(value=1)
         num_rectEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=num_rectNum)
         num_rectEntry.grid(row=0, column=1, padx=15, pady=15)
 
@@ -406,6 +576,7 @@ class ParameterSetWindow(tk.Toplevel):
         scale_rectBoxList["values"] = ["linear", "log10"]
         scale_rectBoxList.grid(row=rowIndex, column=1, padx=15, pady=15)
         scale_rectBoxList.current(0)  # 選擇第一個
+        scale_rectBoxList.bind("<<ComboboxSelected>>", reLoadView)
         pdf_rectLabel = tk.Label(tabs[tabIndex]["tab"], text="pdf_rect")
         pdf_rectLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
         pdf_rectValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
@@ -413,16 +584,17 @@ class ParameterSetWindow(tk.Toplevel):
         pdf_rectBoxList["values"] = ["uniform", "normal"]
         pdf_rectBoxList.grid(row=rowIndex, column=3, padx=15, pady=15)
         pdf_rectBoxList.current(0)  # 選擇第一個
+        pdf_rectBoxList.bind("<<ComboboxSelected>>", reLoadView)
 
         rowIndex = rowIndex + 1
         a_rectLabel = tk.Label(tabs[tabIndex]["tab"], text="a_rect :")
         a_rectLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-        a_rectNum = tk.StringVar(value=1)
+        a_rectNum = tk.IntVar(value=1)
         a_rectEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=a_rectNum)
         a_rectEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
         b_rectLabel = tk.Label(tabs[tabIndex]["tab"], text="b_rect :")
         b_rectLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        b_rectNum = tk.StringVar(value=1)
+        b_rectNum = tk.IntVar(value=1)
         b_rectEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=b_rectNum)
         b_rectEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
@@ -434,41 +606,43 @@ class ParameterSetWindow(tk.Toplevel):
         hidden_pdf_rectBoxList["values"] = ["uniform", "normal"]
         hidden_pdf_rectBoxList.grid(row=rowIndex, column=1, padx=15, pady=15)
         hidden_pdf_rectBoxList.current(0)  # 選擇第一個
+        hidden_pdf_rectBoxList.bind("<<ComboboxSelected>>", reLoadView)
         useHiddenRectValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
-        c2 = tk.Checkbutton(tabs[tabIndex]["tab"], text='use_hidden_rect', variable=useHiddenRectValue, onvalue=1, offvalue=0)
+        c2 = tk.Checkbutton(tabs[tabIndex]["tab"], text='use_hidden_rect', variable=useHiddenRectValue, command=lambda:reLoadView(self), onvalue=1, offvalue=0)
         c2.grid(row=rowIndex, column=2, padx=15, pady=15)
 
         rowIndex = rowIndex + 1
         hidden_a_for_a_rectLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_a_for_a_rect :")
         hidden_a_for_a_rectLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-        hidden_a_for_a_rectNum = tk.StringVar(value=0.001)
+        hidden_a_for_a_rectNum = tk.DoubleVar(value=0.001)
         hidden_a_for_a_rectEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_a_for_a_rectNum)
         hidden_a_for_a_rectEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
         hidden_b_for_a_rectLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_b_for_a_rect :")
         hidden_b_for_a_rectLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        hidden_b_for_a_rectNum = tk.StringVar(value=1000)
+        hidden_b_for_a_rectNum = tk.DoubleVar(value=1000)
         hidden_b_for_a_rectEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_b_for_a_rectNum)
         hidden_b_for_a_rectEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
         rowIndex = rowIndex + 1
         hidden_a_for_b_rectLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_a_for_b_rect :")
         hidden_a_for_b_rectLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-        hidden_a_for_b_rectNum = tk.StringVar(value=0.001)
+        hidden_a_for_b_rectNum = tk.DoubleVar(value=0.001)
         hidden_a_for_b_rectEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_a_for_b_rectNum)
         hidden_a_for_b_rectEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
         hidden_b_for_b_rectLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_b_for_b_rect :")
         hidden_b_for_b_rectLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        hidden_b_for_b_rectNum = tk.StringVar(value=1000)
+        hidden_b_for_b_rectNum = tk.DoubleVar(value=1000)
         hidden_b_for_b_rectEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_b_for_b_rectNum)
         hidden_b_for_b_rectEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
+        # finalDataTab
         tabIndex = tabIndex + 1
         rowIndex = 0
-        btnParameterSet = tk.Button(tabs[tabIndex]["tab"], text='？', command=creatMessageView_5)
-        btnParameterSet.place(width = 40, height = 40, x = 950, y = 0, anchor = "nw")
+        btnParameterSet = tk.Button(tabs[tabIndex]["tab"], image = photo, command=creatMessageView_5)
+        btnParameterSet.place(width = 50, height = 50, x = 940, y = 10, anchor = "nw")
         num_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="num_circle :")
         num_circleLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-        num_circleNum = tk.StringVar(value=0)
+        num_circleNum = tk.IntVar(value=0)
         num_circleEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=num_circleNum)
         num_circleEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
         radius_boundLabel = tk.Label(tabs[tabIndex]["tab"], text="radius_bound :")
@@ -489,6 +663,7 @@ class ParameterSetWindow(tk.Toplevel):
         scale_circleBoxList["values"] = ["linear", "log10"]
         scale_circleBoxList.grid(row=rowIndex, column=1, padx=15, pady=15)
         scale_circleBoxList.current(0)  # 選擇第一個
+        scale_circleBoxList.bind("<<ComboboxSelected>>", reLoadView)
         pdf_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="pdf_circle")
         pdf_circleLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
         pdf_circleValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
@@ -496,18 +671,19 @@ class ParameterSetWindow(tk.Toplevel):
         pdf_circleBoxList["values"] = ["uniform", "normal"]
         pdf_circleBoxList.grid(row=rowIndex, column=3, padx=15, pady=15)
         pdf_circleBoxList.current(0)  # 選擇第一個
+        pdf_circleBoxList.bind("<<ComboboxSelected>>", reLoadView)
 
         #row3
         rowIndex = rowIndex + 1
         a_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="a_circle :")
         a_circleLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-        a_circleNum = tk.StringVar(value=1)
+        a_circleNum = tk.IntVar(value=1)
         a_circleEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=a_circleNum)
         a_circleEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
 
         b_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="b_circle :")
         b_circleLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        b_circleNum = tk.StringVar(value=1)
+        b_circleNum = tk.IntVar(value=1)
         b_circleEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=b_circleNum)
         b_circleEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
@@ -520,20 +696,22 @@ class ParameterSetWindow(tk.Toplevel):
         hidden_pdf_circleBoxList["values"] = ["uniform", "normal"]
         hidden_pdf_circleBoxList.grid(row=rowIndex, column=1, padx=15, pady=15)
         hidden_pdf_circleBoxList.current(0)  # 選擇第一個
+        hidden_pdf_circleBoxList.bind("<<ComboboxSelected>>", reLoadView)
+        # hidden_pdf_circleBoxList.grid(row=rowIndex, column=3, padx=15, pady=15)
         useHiddencircleValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
-        c2 = tk.Checkbutton(tabs[tabIndex]["tab"], text='use_hidden_circle', variable=useHiddencircleValue, onvalue=1, offvalue=0)
+        c2 = tk.Checkbutton(tabs[tabIndex]["tab"], text='use_hidden_circle', variable=useHiddencircleValue, command=lambda:reLoadView(self), onvalue=1, offvalue=0)
         c2.grid(row=rowIndex, column=2, padx=15, pady=15)
 
         #row5
         rowIndex = rowIndex + 1
         hidden_a_for_a_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_a_for_a_circle :")
         hidden_a_for_a_circleLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-        hidden_a_for_a_circleNum = tk.StringVar(value=0.001)
+        hidden_a_for_a_circleNum = tk.DoubleVar(value=0.001)
         hidden_a_for_a_circleEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_a_for_a_circleNum)
         hidden_a_for_a_circleEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
         hidden_b_for_a_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_b_for_a_circle :")
         hidden_b_for_a_circleLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        hidden_b_for_a_circleNum = tk.StringVar(value=1000)
+        hidden_b_for_a_circleNum = tk.DoubleVar(value=1000)
         hidden_b_for_a_circleEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_b_for_a_circleNum)
         hidden_b_for_a_circleEntry.grid(row=4, column=3, padx=15, pady=15)
 
@@ -541,85 +719,76 @@ class ParameterSetWindow(tk.Toplevel):
         rowIndex = rowIndex + 1
         hidden_a_for_b_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_a_for_b_circle :")
         hidden_a_for_b_circleLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-        hidden_a_for_b_circleNum = tk.StringVar(value=0.001)
+        hidden_a_for_b_circleNum = tk.DoubleVar(value=0.001)
         hidden_a_for_b_circleEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_a_for_b_circleNum)
         hidden_a_for_b_circleEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
 
         hidden_b_for_b_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_b_for_b_circle :")
         hidden_b_for_b_circleLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        hidden_b_for_b_circleNum = tk.StringVar(value=1000)
+        hidden_b_for_b_circleNum = tk.DoubleVar(value=1000)
         hidden_b_for_b_circleEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_b_for_b_circleNum)
         hidden_b_for_b_circleEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
         #Tab5
         tabIndex = tabIndex + 1
         rowIndex = 0
-        numSamplesLabel = tk.Label(tabs[tabIndex]["tab"], text="num_samples")
-        numSamplesLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
-        numSamplesEntry = tk.Label(tabs[tabIndex]["tab"], textvariable=numSamplesNum)
-        numSamplesEntry.grid(row=rowIndex, column=1, padx=5, pady=5)
-        trainRatioLabel = tk.Label(tabs[tabIndex]["tab"], text="train_ratio")
-        trainRatioLabel.grid(row=rowIndex, column=2, padx=5, pady=5)
-        trainRatioEntry = tk.Label(tabs[tabIndex]["tab"], textvariable=trainRatioNum)
-        trainRatioEntry.grid(row=rowIndex, column=3, padx=5, pady=5)
+        numSamplesLabel = tk.Label(tabs[tabIndex]["tab"], text="num_samples : ")
+        numSamplesLabel.grid(row=rowIndex, column=0, padx=0, pady=0)
+        numSamplesLabel = tk.Label(tabs[tabIndex]["tab"], textvariable=numSamplesNum)
+        numSamplesLabel.grid(row=rowIndex, column=1, padx=0, pady=0)
+        trainRatioLabel = tk.Label(tabs[tabIndex]["tab"], text="train_ratio : ")
+        trainRatioLabel.grid(row=rowIndex, column=2, padx=0, pady=0)
+        trainRatioLabel = tk.Label(tabs[tabIndex]["tab"], textvariable=trainRatioNum)
+        trainRatioLabel.grid(row=rowIndex, column=3, padx=0, pady=0)
+        validRatioLabel = tk.Label(tabs[tabIndex]["tab"], text="valid_ratio : ")
+        validRatioLabel.grid(row=rowIndex, column=4, padx=0, pady=0)
+        validRatioLabel = tk.Label(tabs[tabIndex]["tab"], textvariable=validRatioNum)
+        validRatioLabel.grid(row=rowIndex, column=5, padx=0, pady=0)
 
         rowIndex = rowIndex + 1
-        validRatioLabel = tk.Label(tabs[tabIndex]["tab"], text="valid_ratio")
-        validRatioLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
-        validRatioEntry = tk.Label(tabs[tabIndex]["tab"], textvariable=validRatioNum)
-        validRatioEntry.grid(row=rowIndex, column=1, padx=5, pady=5)
-        testRatioLabel = tk.Label(tabs[tabIndex]["tab"], text="test_ratio")
-        testRatioLabel.grid(row=rowIndex, column=2, padx=5, pady=5)
-        testRatioEntry = tk.Label(tabs[tabIndex]["tab"], textvariable=testRatioNum)
-        testRatioEntry.grid(row=rowIndex, column=3, padx=5, pady=5)
+        testRatioLabel = tk.Label(tabs[tabIndex]["tab"], text=f"test_ratio : ")
+        testRatioLabel.grid(row=rowIndex, column=0, padx=0, pady=0)
+        testRatioLabel = tk.Label(tabs[tabIndex]["tab"], textvariable=testRatioNum)
+        testRatioLabel.grid(row=rowIndex, column=1, padx=0, pady=0)
+        selectArrayTypeLabel = tk.Label(tabs[tabIndex]["tab"], text="Array Type : ")
+        selectArrayTypeLabel.grid(row=rowIndex, column=2, padx=0, pady=0)
+        selectArrayTypeLabel = tk.Label(tabs[tabIndex]["tab"], textvariable=arrayTypeValue)
+        selectArrayTypeLabel.grid(row=rowIndex, column=3, padx=0, pady=0)
+        numKGLabel = tk.Label(tabs[tabIndex]["tab"], text=f"num_k_g : ")
+        numKGLabel.grid(row=rowIndex, column=4, padx=0, pady=0)
+        numKGLabel = tk.Label(tabs[tabIndex]["tab"], textvariable=numKGNum)
+        numKGLabel.grid(row=rowIndex, column=5, padx=0, pady=0)
 
         rowIndex = rowIndex + 1
-        selectArrayTypeLabel = tk.Label(tabs[tabIndex]["tab"], text="Array Type")
-        selectArrayTypeLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
-        arrayTypeBoxList = tk.Label(tabs[tabIndex]["tab"], textvariable=arrayTypeValue)
-        arrayTypeBoxList.grid(row=rowIndex, column=1, padx=5, pady=5)
-
-        numKGLabel = tk.Label(tabs[tabIndex]["tab"], text="num_k_g")
-        numKGLabel.grid(row=rowIndex, column=2, padx=5, pady=5)
-        numKGEntry = tk.Label(tabs[tabIndex]["tab"], textvariable=numKGNum)
-        numKGEntry.grid(row=rowIndex, column=3, padx=5, pady=5)
-
-        rowIndex = rowIndex + 1
-        NXLabel = tk.Label(tabs[tabIndex]["tab"], text="nx:")
-        NXLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
-        NXEntry = tk.Label(tabs[tabIndex]["tab"], textvariable=NXNum)
-        NXEntry.grid(row=rowIndex, column=1, padx=5, pady=5)
-        xKernelSizeLabel = tk.Label(tabs[tabIndex]["tab"], text="x_kernel_size:")
-        xKernelSizeLabel.grid(row=rowIndex, column=2, padx=5, pady=5)
-        xKernelSizeEntry = tk.Label(tabs[tabIndex]["tab"], textvariable=xKernelSizeNum)
-        xKernelSizeEntry.grid(row=rowIndex, column=3, padx=5, pady=5)
+        NXLabel = tk.Label(tabs[tabIndex]["tab"], text="nx : ")
+        NXLabel.grid(row=rowIndex, column=0, padx=0, pady=0)
+        NXLabel = tk.Label(tabs[tabIndex]["tab"], textvariable=NXNum)
+        NXLabel.grid(row=rowIndex, column=1, padx=0, pady=0)
+        xKernelSizeLabel = tk.Label(tabs[tabIndex]["tab"], text="x_kernel_size : ")
+        xKernelSizeLabel.grid(row=rowIndex, column=2, padx=0, pady=0)
+        xKernelSizeLabel = tk.Label(tabs[tabIndex]["tab"], textvariable=xKernelSizeNum)
+        xKernelSizeLabel.grid(row=rowIndex, column=3, padx=0, pady=0)
+        NZLabel = tk.Label(tabs[tabIndex]["tab"], text="nz : ")
+        NZLabel.grid(row=rowIndex, column=4, padx=0, pady=0)
+        NZLabel = tk.Label(tabs[tabIndex]["tab"], textvariable=NZNum)
+        NZLabel.grid(row=rowIndex, column=5, padx=0, pady=0)
 
         rowIndex = rowIndex + 1
-        NZLabel = tk.Label(tabs[tabIndex]["tab"], text="nz:")
-        NZLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
-        NZEntry = tk.Label(tabs[tabIndex]["tab"], textvariable=NZNum)
-        NZEntry.grid(row=rowIndex, column=1, padx=5, pady=5)
-        zKernelSizeLabel = tk.Label(tabs[tabIndex]["tab"], text="z_kernel_size:")
-        zKernelSizeLabel.grid(row=rowIndex, column=2, padx=5, pady=5)
-        zKernelSizeEntry = tk.Label(tabs[tabIndex]["tab"], textvariable=zKernelSizeNum)
-        zKernelSizeEntry.grid(row=rowIndex, column=3, padx=5, pady=5)
-
-        rowIndex = rowIndex + 1
-        datasetDirLabel = tk.Label(tabs[tabIndex]["tab"], text="dataset_dir")
-        datasetDirLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
-        datasetDirEntry = tk.Label(tabs[tabIndex]["tab"], textvariable=datasetDirPath)
-        datasetDirEntry.grid(row=rowIndex, column=1, padx=5, pady=5)
-
-
-        rowIndex = rowIndex + 1
+        zKernelSizeLabel = tk.Label(tabs[tabIndex]["tab"], text="z_kernel_size : ")
+        zKernelSizeLabel.grid(row=rowIndex, column=0, padx=0, pady=0)
+        zKernelSizeLabel = tk.Label(tabs[tabIndex]["tab"], textvariable=zKernelSizeNum)
+        zKernelSizeLabel.grid(row=rowIndex, column=1, padx=0, pady=0)
+        datasetDirLabel = tk.Label(tabs[tabIndex]["tab"], text="dataset_dir : ")
+        datasetDirLabel.grid(row=rowIndex, column=2, padx=0, pady=0)
+        datasetDirLabel = tk.Label(tabs[tabIndex]["tab"], textvariable=datasetDirPath)
+        datasetDirLabel.grid(row=rowIndex, column=3, padx=0, pady=0)
         configNameLabel = tk.Label(tabs[tabIndex]["tab"], text="configName")
-        configNameLabel.grid(row=rowIndex, column=0, padx=5, pady=5)
+        configNameLabel.grid(row=rowIndex, column=4, padx=0, pady=0)
         tempDate = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         configNameValue = tk.StringVar(value=tempDate)
         rootSendData = {'newConfigFileName':configNameValue, 'generateDataStop':'false'}
         configNameEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=configNameValue)
-        configNameEntry.grid(row=rowIndex, column=1, padx=5, pady=5)
-
+        configNameEntry.grid(row=rowIndex, column=5, padx=0, pady=0)
 
         import threading
         class Threader(threading.Thread):
@@ -702,7 +871,7 @@ class ParameterSetWindow(tk.Toplevel):
 
 
             btnSend = tk.Button(tabs[tabIndex]["tab"], text='傳送參數並生成資料', command =lambda:Threader())
-            btnSend.grid(row=rowIndex, column=2, padx=5, pady=5)
+            btnSend.grid(row=rowIndex, column=6, padx=0, pady=0)
             reLoadView(self)
 
         def loadDataRefreshView():
@@ -819,6 +988,7 @@ class ParameterSetWindow(tk.Toplevel):
             hidden_b_for_a_circleNum.set(rootSendData['hidden_b_for_a_circle'])
             hidden_a_for_b_circleNum.set(rootSendData['hidden_a_for_b_circle'])
             hidden_b_for_b_circleNum.set(rootSendData['hidden_b_for_b_circle'])
+            reLoadView(self)
 
     def fun(self):
         return "Hello world."
