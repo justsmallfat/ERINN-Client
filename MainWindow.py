@@ -26,12 +26,13 @@ global predictProgressName
 global predictProgressValue
 global timer
 global intervalTime
+global functionMsgFrame
+functionMsgFrame = tk.Frame(window)
 intervalTime = 30
 timeout = 5
 
 #主功能按鍵
 def parameterSet():
-
     GenerateDataWindow.ParameterSetWindow(window)
 def trainModel():
     TrainModelWindow.ParameterSetWindow(window)
@@ -44,16 +45,26 @@ def showResult():
 def uploadModel():
     window.filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file")
     uploadModeMessageValue.set(window.filename)
-    print (window.filename)
     files = {'file': open(window.filename, 'rb')}
-    print (window.filename)
-    print (files)
     r = requests.post(f'http://{yaml_data["ServerDomainName"]}:{yaml_data["ServerPort"]}/uploadModel'
                       , files =files)
     if r.text == 'Success':
         uploadModeMessageValue.set('上傳成功')
     else:
         uploadModeMessageValue.set('上傳失敗')
+    print(r.text)
+
+
+def uploadData():
+    window.filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file")
+    uploadDataMessageValue.set(window.filename)
+    files = {'file': open(window.filename, 'rb')}
+    r = requests.post(f'http://{yaml_data["ServerDomainName"]}:{yaml_data["ServerPort"]}/uploadData'
+                      , files =files)
+    if r.text == 'Success':
+        uploadDataMessageValue.set('上傳成功')
+    else:
+        uploadDataMessageValue.set('上傳失敗')
     print(r.text)
 
 #停止活動
@@ -162,7 +173,7 @@ def initTimmer():
     mainWindowTimer.start()
 
 # 讀取config檔
-errorMessageText = tk.Text(window, height=10, width=40)
+errorMessageText = tk.Text()
 try:
     yaml_data = Tools.getConFigYaml_data('config.yml')
 except OSError as e:
@@ -181,117 +192,158 @@ except Exception as e:
 
 
 nowRow = 0
-serverDomainSetLabel = tk.Label(window, text="伺服器Domain")
-serverDomainSetLabel.grid(row=nowRow, column=0, sticky=tk.W, padx=5, pady=10)
+setFrame = tk.Frame(window)
+setFrame.grid(row=nowRow, column=0, sticky=tk.W, padx=5, pady=10)
+serverDomainSetLabel = tk.Label(setFrame, text="伺服器Domain")
+serverDomainSetLabel.grid(row=0, column=0, sticky=tk.W, padx=5, pady=10)
 # serverDomainSetLabel.grid(row=nowRow, column=0, columnspan=3, sticky=tk.W, padx=5, pady=10)
 configDomainNameStr = tk.StringVar(value=yaml_data['ServerDomainName'])
-configDomainNameEntry = tk.Entry(window, textvariable=configDomainNameStr)
-configDomainNameEntry.grid(row=nowRow, column=1, padx=10, pady=10)
-serverPortSetLabel = tk.Label(window, text="伺服器Port")
+configDomainNameEntry = tk.Entry(setFrame, textvariable=configDomainNameStr)
+configDomainNameEntry.grid(row=0, column=1, padx=10, pady=10)
+serverPortSetLabel = tk.Label(setFrame, text="伺服器Port")
 # serverPortSetLabel.grid(row=nowRow, column=2, columnspan=3, sticky=tk.W, padx=10, pady=10)
-serverPortSetLabel.grid(row=nowRow, column=2, sticky=tk.W, padx=10, pady=10)
+serverPortSetLabel.grid(row=1, column=0, sticky=tk.W, padx=10, pady=10)
 configPoartStr = tk.StringVar(value=yaml_data['ServerPort'])
-configPoartEntry = tk.Entry(window, textvariable=configPoartStr)
-configPoartEntry.grid(row=nowRow, column=3, padx=10, pady=10)
+configPoartEntry = tk.Entry(setFrame, textvariable=configPoartStr)
+configPoartEntry.grid(row=1, column=1, padx=10, pady=10)
 photo = tk.PhotoImage(file ='D:/kevin_paper/project/ERINN-Client/question.gif')
-btnParameterSet = tk.Button(window, text='連接', command=saveConfig)
-btnParameterSet.grid(row=nowRow, column=4, padx=10, pady=10)
+btnParameterSet = tk.Button(setFrame, text='連接', command=saveConfig)
+btnParameterSet.grid(row=1, column=2, padx=10, pady=10)
+
+logFrame = tk.Frame(window)
+logFrame.grid(row=nowRow, rowspan=6, column=1, sticky=tk.W, padx=5, pady=10)
+parameterSetMsgLabel = tk.Label(logFrame, text="日誌")
+parameterSetMsgLabel.grid(row=0, column=0, padx=10, pady=10)
+generateErrorMessageValue = tk.StringVar()
+errorMessageText = tk.Text(logFrame, height=35, width=70)
+errorMessageText.grid(row=1, column=0, sticky=tk.W, padx=10, pady=10)
+
+
+def showFunctionMessage(self, message):
+    # print(f'qq {message}')
+    global functionMsgFrame
+    functionMsgFrame.grid_forget()
+    functionMsgFrame = tk.Frame(window)
+    functionMsgFrame.grid(row=3, column=0, sticky=tk.W, padx=5, pady=10)
+    functionMsgValue = tk.StringVar(value=message)
+    functionMsgLabel = tk.Label(functionMsgFrame, textvariable=functionMsgValue, wraplength=300, justify = 'left')
+    functionMsgLabel.pack(side="top", fill="x")
+nowRow = nowRow+1
+mainFunctionFrame = tk.Frame(window)
+mainFunctionFrame.grid(row=nowRow, column=0, sticky=tk.W, padx=5, pady=10)
+btnParameterSet = tk.Button(mainFunctionFrame, text='生成資料', command=parameterSet)
+btnParameterSet.grid(row=0, column=0, padx=10, pady=10)
+btnParameterSet.bind("<Enter>", lambda event:showFunctionMessage(event, '可以讀去過往紀錄的參數，也可修正參數，並用設定的參數生成虛擬數據，以用來訓練模型。'))
+btnTrainModel = tk.Button(mainFunctionFrame, text='訓練模型', command=trainModel)
+btnTrainModel.grid(row=0, column=1, padx=10, pady=10)
+btnTrainModel.bind("<Enter>", lambda event:showFunctionMessage(event, '選擇之前所產數據，並設定訓練參數，以用來訓練模型。'))
+btnTestModel = tk.Button(mainFunctionFrame, text='測試模型', command=predictResistivity)
+btnTestModel.grid(row=0, column=2, padx=10, pady=10)
+btnTestModel.bind("<Enter>", lambda event:showFunctionMessage(event, '選擇模型，測試模型準確度。'))
+btnResult = tk.Button(mainFunctionFrame, text='結果瀏覽', command=showResult)
+btnResult.grid(row=0, column=3, padx=10, pady=10)
+btnResult.bind("<Enter>", lambda event:showFunctionMessage(event, '呈現結果，表圖下載。'))
+btnUploadModel = tk.Button(mainFunctionFrame, text='上傳模組', command=uploadModel)
+btnUploadModel.grid(row=1, column=0, padx=10, pady=10)
+btnUploadModel.bind("<Enter>", lambda event:showFunctionMessage(event, '上傳自行調整模組。'))
+uploadModeMessageValue = tk.StringVar(value='請選擇上傳模組檔案')
+uploadModelMsgLabel = tk.Label(mainFunctionFrame, textvariable=uploadModeMessageValue)
+uploadModelMsgLabel.grid(row=1, column=1, columnspan=3, sticky=tk.W, padx=10, pady=10)
+btnUploadData = tk.Button(mainFunctionFrame, text='上傳資料', command=uploadData)
+btnUploadData.grid(row=2, column=0, padx=10, pady=10)
+btnUploadData.bind("<Enter>", lambda event:showFunctionMessage(event, '上傳真實資料。'))
+uploadDataMessageValue = tk.StringVar(value='請選擇上傳資料檔案')
+uploadModelMsgLabel = tk.Label(mainFunctionFrame, textvariable=uploadDataMessageValue)
+uploadModelMsgLabel.grid(row=2, column=1, columnspan=3, sticky=tk.W, padx=10, pady=10)
 
 # nowRow = nowRow+1
-# btnParameterSet = tk.Button(window, text='生成資料', command=parameterSet)
-# btnParameterSet.grid(row=nowRow, column=0, padx=10, pady=10)
+# functionMsgFrame = tk.Frame(window)
+# functionMsgFrame.grid(row=nowRow, column=0, sticky=tk.W, padx=5, pady=10)
+# functionMsgValue = tk.StringVar(value='功能說明')
+# functionMsgLabel = tk.Label(functionMsgFrame, textvariable=functionMsgValue)
+# functionMsgLabel.grid(row=0, column=0, columnspan=4, padx=10, pady=10)
+
 # parameterSetMsgLabel = tk.Label(window, text="可以讀去過往紀錄的參數，也可修正參數，並用設定的參數生成虛擬數據，以用來訓練模型。")
 # # parameterSetMsgLabel.grid(row=nowRow, column=1, columnspan=3, sticky=tk.W, padx=10, pady=10)
-# parameterSetMsgLabel = tk.Label(window, text="日誌")
-# parameterSetMsgLabel.grid(row=nowRow, column=4, padx=10, pady=10)
 #
 # nowRow = nowRow+1
-# btnTrainModel = tk.Button(window, text='訓練模型', command=trainModel, )
-# btnTrainModel.grid(row=nowRow, column=0, padx=10, pady=10)
-# trainModelMsgLabel = tk.Label(window, text="選擇之前所產數據，並設定訓練參數，以用來訓練模型。")
+# trainModelMsgLabel = tk.Label(window, text="")
 # # trainModelMsgLabel.grid(row=nowRow, column=1, columnspan=3, sticky=tk.W, padx=10, pady=10)
 # generateErrorMessageValue = tk.StringVar()
 # errorMessageText.grid(row=nowRow, rowspan=4, column=4, sticky=tk.W, padx=10, pady=10)
 #
 # nowRow = nowRow+1
-# btnTestModel = tk.Button(window, text='測試模型', command=predictResistivity)
-# btnTestModel.grid(row=nowRow, column=0, padx=10, pady=10)
 # trainModelMsgLabel = tk.Label(window, text="選擇模型，測試模型準確度。")
 # # trainModelMsgLabel.grid(row=nowRow, column=1, columnspan=3, sticky=tk.W, padx=10, pady=10)
 #
 # nowRow = nowRow+1
 #
-# btnTestModel = tk.Button(window, text='結果瀏覽', command=showResult)
-# btnTestModel.grid(row=nowRow, column=0, padx=10, pady=10)
 # trainModelMsgLabel = tk.Label(window, text="呈現結果，表圖下載。")
 # # trainModelMsgLabel.grid(row=nowRow, column=1, columnspan=3, sticky=tk.W, padx=10, pady=10)
 #
 # nowRow = nowRow+1
 #
-# btnUploadModel = tk.Button(window, text='上傳模組', command=uploadModel)
-# btnUploadModel.grid(row=nowRow, column=0, padx=10, pady=10)
-# uploadModeMessageValue = tk.StringVar(value='請選擇上傳模組檔案')
-# uploadModelMsgLabel = tk.Label(window, textvariable=uploadModeMessageValue)
-# # uploadModelMsgLabel.grid(row=nowRow, column=1, columnspan=3, sticky=tk.W, padx=10, pady=10)
 #
-# nowRow = nowRow+1
+nowRow = 4+1
+progressFrame = tk.Frame(window)
+progressFrame.grid(row=nowRow, column=0, sticky=tk.W, padx=5, pady=10)
 #
-# parameterSetMsgLabel = tk.Label(window, text="排程")
-# parameterSetMsgLabel.grid(row=nowRow, column=0, padx=10, pady=10)
-# parameterSetMsgLabel = tk.Label(window, text="使用設定檔")
-# parameterSetMsgLabel.grid(row=nowRow, column=1, padx=10, pady=10)
-# parameterSetMsgLabel = tk.Label(window, text="進度")
-# parameterSetMsgLabel.grid(row=nowRow, column=2, padx=10, pady=10)
-# parameterSetMsgLabel = tk.Label(window, text="備註")
+parameterSetMsgLabel = tk.Label(progressFrame, text="排程")
+parameterSetMsgLabel.grid(row=0, column=0, padx=10, pady=10)
+parameterSetMsgLabel = tk.Label(progressFrame, text="使用設定檔")
+parameterSetMsgLabel.grid(row=0, column=1, padx=10, pady=10)
+parameterSetMsgLabel = tk.Label(progressFrame, text="進度")
+parameterSetMsgLabel.grid(row=0, column=2, padx=10, pady=10)
+# parameterSetMsgLabel = tk.Label(progressFrame, text="備註")
 # parameterSetMsgLabel.grid(row=nowRow, column=3, padx=10, pady=10)
 #
-# nowRow = nowRow+1
+nowRow = nowRow+1
 #
-# parameterSetMsgLabel = tk.Label(window, text="現在生成資料 : ")
-# parameterSetMsgLabel.grid(row=nowRow, column=0, sticky=tk.W, padx=10, pady=10)
-# generateProgressName = tk.StringVar()
-# parameterSetMsgLabel = tk.Label(window, textvariable=generateProgressName)
-# parameterSetMsgLabel.grid(row=nowRow, column=1, sticky=tk.W, padx=10, pady=10)
-# generateProgressValue = tk.StringVar()
-# parameterSetMsgLabel = tk.Label(window, textvariable=generateProgressValue)
-# parameterSetMsgLabel.grid(row=nowRow, column=2, sticky=tk.W, padx=10, pady=10)
-# btnSend = tk.Button(window, text='暫停', command =lambda:Threader('generateData',generateProgressName.get()))
-# btnSend.grid(row=nowRow, column=4, padx=10, pady=10)
-#
-# nowRow = nowRow+1
-#
-# parameterSetMsgLabel_2 = tk.Label(window, text="現在訓練模組 : ")
-# parameterSetMsgLabel_2.grid(row=nowRow, column=0, sticky=tk.W, padx=10, pady=10)
-# trainingProgressName = tk.StringVar()
-# parameterSetMsgLabel_2 = tk.Label(window, textvariable=trainingProgressName)
-# parameterSetMsgLabel_2.grid(row=nowRow, column=1, sticky=tk.W, padx=10, pady=10)
-# trainingProgressValue = tk.StringVar()
-# parameterSetMsgLabel_2 = tk.Label(window, textvariable=trainingProgressValue)
-# parameterSetMsgLabel_2.grid(row=nowRow, column=2, sticky=tk.W, padx=10, pady=10)
-# btnSend = tk.Button(window, text='暫停', command =lambda:Threader('training',trainingProgressName.get()))
-# btnSend.grid(row=nowRow, column=4, padx=10, pady=10)
-# # traininErrorMessageValue = tk.StringVar()
-# # errorMessageText_2 = tk.Text(window, height=1, width=80)
-# # errorMessageText_2.grid(row=nowRow, column=3, sticky=tk.W, padx=10, pady=10)
+parameterSetMsgLabel = tk.Label(progressFrame, text="現在生成資料 : ")
+parameterSetMsgLabel.grid(row=1, column=0, sticky=tk.W, padx=10, pady=10)
+generateProgressName = tk.StringVar()
+parameterSetMsgLabel = tk.Label(progressFrame, textvariable=generateProgressName)
+parameterSetMsgLabel.grid(row=1, column=1, sticky=tk.W, padx=10, pady=10)
+generateProgressValue = tk.StringVar()
+parameterSetMsgLabel = tk.Label(progressFrame, textvariable=generateProgressValue)
+parameterSetMsgLabel.grid(row=1, column=2, sticky=tk.W, padx=10, pady=10)
+btnSend = tk.Button(progressFrame, text='暫停', command =lambda:Threader('generateData',generateProgressName.get()))
+btnSend.grid(row=1, column=3, padx=10, pady=10)
 #
 # nowRow = nowRow+1
 #
-# parameterSetMsgLabel_3 = tk.Label(window, text="現在測試模型 : ")
-# parameterSetMsgLabel_3.grid(row=nowRow, column=0, sticky=tk.W, padx=10, pady=10)
-# predictProgressName = tk.StringVar()
-# parameterSetMsgLabel_3 = tk.Label(window, textvariable=predictProgressName)
-# parameterSetMsgLabel_3.grid(row=nowRow, column=1, sticky=tk.W, padx=10, pady=10)
-# predictProgressValue = tk.StringVar()
-# parameterSetMsgLabel_3 = tk.Label(window, textvariable=predictProgressValue)
-# parameterSetMsgLabel_3.grid(row=nowRow, column=2, sticky=tk.W, padx=10, pady=10)
-# btnSend = tk.Button(window, text='暫停', command =lambda:Threader('predict',predictProgressName.get()))
-# btnSend.grid(row=nowRow, column=4, padx=10, pady=10)
+parameterSetMsgLabel_2 = tk.Label(progressFrame, text="現在訓練模組 : ")
+parameterSetMsgLabel_2.grid(row=2, column=0, sticky=tk.W, padx=10, pady=10)
+trainingProgressName = tk.StringVar()
+parameterSetMsgLabel_2 = tk.Label(progressFrame, textvariable=trainingProgressName)
+parameterSetMsgLabel_2.grid(row=2, column=1, sticky=tk.W, padx=10, pady=10)
+trainingProgressValue = tk.StringVar()
+parameterSetMsgLabel_2 = tk.Label(progressFrame, textvariable=trainingProgressValue)
+parameterSetMsgLabel_2.grid(row=2, column=2, sticky=tk.W, padx=10, pady=10)
+btnSend = tk.Button(progressFrame, text='暫停', command =lambda:Threader('training',trainingProgressName.get()))
+btnSend.grid(row=2, column=3, padx=10, pady=10)
+# traininErrorMessageValue = tk.StringVar()
+# errorMessageText_2 = tk.Text(window, height=1, width=80)
+# errorMessageText_2.grid(row=nowRow, column=3, sticky=tk.W, padx=10, pady=10)
+#
+nowRow = nowRow+1
+#
+parameterSetMsgLabel_3 = tk.Label(progressFrame, text="現在測試模型 : ")
+parameterSetMsgLabel_3.grid(row=3, column=0, sticky=tk.W, padx=10, pady=10)
+predictProgressName = tk.StringVar()
+parameterSetMsgLabel_3 = tk.Label(progressFrame, textvariable=predictProgressName)
+parameterSetMsgLabel_3.grid(row=3, column=1, sticky=tk.W, padx=10, pady=10)
+predictProgressValue = tk.StringVar()
+parameterSetMsgLabel_3 = tk.Label(progressFrame, textvariable=predictProgressValue)
+parameterSetMsgLabel_3.grid(row=3, column=2, sticky=tk.W, padx=10, pady=10)
+btnSend = tk.Button(progressFrame, text='暫停', command =lambda:Threader('predict',predictProgressName.get()))
+btnSend.grid(row=3, column=3, padx=10, pady=10)
 #
 # nowRow = nowRow+1
 #
 #
-# initRootProgress('waiting', 'waiting', 'waiting')
-# initTimmer()
+initRootProgress('waiting', 'waiting', 'waiting')
+initTimmer()
 
 
 window.mainloop()

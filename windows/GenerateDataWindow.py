@@ -131,34 +131,20 @@ class ParameterSetWindow(tk.Toplevel):
                     pd = norm(loc=a, scale=b)
                 else:
                     raise ValueError('You did not input enough or correct keyword argument.')
-
-
                 y_axis = pd.pdf(x_axis)
-
-                # mid = (b+a)/2
-                # y_axis = norm.pdf(x_axis, mid)
-                # plot data
                 pyplot = f.add_subplot(111)
-                # print(f'x_axis = {x_axis } y_axis {y_axis} a {a} b {b}')
                 pyplot.plot(x_axis, y_axis)
             else:
                 print(f'uniform')
-                # x_axis = linspace(uniform.ppf(a), uniform.ppf(b), x_axis_size)
                 if a>b:
                     return f
-
                 pd = uniform(a, b-a)
                 y_axis = pd.pdf(x_axis)
                 pyplot = f.add_subplot(111)
                 pyplot.plot(x_axis, y_axis)
                 r = pd.rvs(size=x_axis_size)
-                # print(f'x_axis = {x_axis } y_axis {y_axis} a {a} b {b} r {r}')
                 pyplot.hist(r, density=True, histtype='stepfilled', alpha=0.2)
                 pyplot.legend(loc='best', frameon=False)
-                # x_axis = linspace(bBackgroundNum.get(), aBackgroundNum.get(), 100)
-                # mid = (bBackgroundNum.get()+aBackgroundNum.get())/2
-                # y_axis = uniform.pdf(x_axis, mid)
-                # pyplot.plot(x_axis, y_axis)
             return f
 
         def reLoadView(self):
@@ -419,12 +405,12 @@ class ParameterSetWindow(tk.Toplevel):
         rowIndex = rowIndex + 1
         aBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="a_background:")
         aBackgroundLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-        aBackgroundNum = tk.DoubleVar(value=10)
+        aBackgroundNum = tk.IntVar(value=10)
         aBackgroundEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=aBackgroundNum)
         aBackgroundEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
         bBackgroundLabel = tk.Label(tabs[tabIndex]["tab"], text="b_background:")
         bBackgroundLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        bBackgroundNum = tk.DoubleVar(value=1)
+        bBackgroundNum = tk.IntVar(value=1)
         bBackgroundEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=bBackgroundNum)
         bBackgroundEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
@@ -439,9 +425,9 @@ class ParameterSetWindow(tk.Toplevel):
         hiddenPdfBackgroundBoxList.bind("<<ComboboxSelected>>", reLoadView)
         useHiddenBackgroundValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
         hidden_a_for_a_backgroundNum = tk.DoubleVar(value=0.001)
-        hidden_b_for_a_backgroundNum = tk.DoubleVar(value=1000)
+        hidden_b_for_a_backgroundNum = tk.IntVar(value=1000)
         hidden_a_for_b_backgroundNum = tk.DoubleVar(value=0.001)
-        hidden_b_for_b_backgroundNum = tk.DoubleVar(value=100)
+        hidden_b_for_b_backgroundNum = tk.IntVar(value=100)
         c1 = tk.Checkbutton(tabs[tabIndex]["tab"], text='use_hidden_background', variable=useHiddenBackgroundValue, command=lambda:reLoadView(self), onvalue=1, offvalue=0)
         c1.grid(row=rowIndex, column=2, padx=15, pady=15)
 
@@ -546,7 +532,7 @@ class ParameterSetWindow(tk.Toplevel):
         hidden_a_for_a_rectEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
         hidden_b_for_a_rectLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_b_for_a_rect :")
         hidden_b_for_a_rectLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        hidden_b_for_a_rectNum = tk.DoubleVar(value=1000)
+        hidden_b_for_a_rectNum = tk.IntVar(value=1000)
         hidden_b_for_a_rectEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_b_for_a_rectNum)
         hidden_b_for_a_rectEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
@@ -558,7 +544,7 @@ class ParameterSetWindow(tk.Toplevel):
         hidden_a_for_b_rectEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
         hidden_b_for_b_rectLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_b_for_b_rect :")
         hidden_b_for_b_rectLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        hidden_b_for_b_rectNum = tk.DoubleVar(value=1000)
+        hidden_b_for_b_rectNum = tk.IntVar(value=100)
         hidden_b_for_b_rectEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_b_for_b_rectNum)
         hidden_b_for_b_rectEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
@@ -610,7 +596,7 @@ class ParameterSetWindow(tk.Toplevel):
 
         b_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="b_circle :")
         b_circleLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        b_circleNum = tk.IntVar(value=1)
+        b_circleNum = tk.DoubleVar(value=1)
         b_circleEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=b_circleNum)
         b_circleEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
@@ -633,12 +619,12 @@ class ParameterSetWindow(tk.Toplevel):
         rowIndex = rowIndex + 1
         hidden_a_for_a_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_a_for_a_circle :")
         hidden_a_for_a_circleLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-        hidden_a_for_a_circleNum = tk.DoubleVar(value=0.001)
+        hidden_a_for_a_circleNum = tk.IntVar(value=2900)
         hidden_a_for_a_circleEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_a_for_a_circleNum)
         hidden_a_for_a_circleEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
         hidden_b_for_a_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_b_for_a_circle :")
         hidden_b_for_a_circleLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        hidden_b_for_a_circleNum = tk.DoubleVar(value=1000)
+        hidden_b_for_a_circleNum = tk.IntVar(value=3100)
         hidden_b_for_a_circleEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_b_for_a_circleNum)
         hidden_b_for_a_circleEntry.grid(row=4, column=3, padx=15, pady=15)
 
@@ -646,13 +632,13 @@ class ParameterSetWindow(tk.Toplevel):
         rowIndex = rowIndex + 1
         hidden_a_for_b_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_a_for_b_circle :")
         hidden_a_for_b_circleLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
-        hidden_a_for_b_circleNum = tk.DoubleVar(value=0.001)
+        hidden_a_for_b_circleNum = tk.IntVar(value=9)
         hidden_a_for_b_circleEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_a_for_b_circleNum)
         hidden_a_for_b_circleEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
 
         hidden_b_for_b_circleLabel = tk.Label(tabs[tabIndex]["tab"], text="hidden_b_for_b_circle :")
         hidden_b_for_b_circleLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        hidden_b_for_b_circleNum = tk.DoubleVar(value=1000)
+        hidden_b_for_b_circleNum = tk.IntVar(value=11)
         hidden_b_for_b_circleEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=hidden_b_for_b_circleNum)
         hidden_b_for_b_circleEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
@@ -785,7 +771,7 @@ class ParameterSetWindow(tk.Toplevel):
                 rootSendData.update({'hidden_b_for_b_circle': hidden_b_for_b_circleNum.get()})
                 global sendJson
                 sendJson = json.dumps(rootSendData)
-                print('send')
+                print(f'send : {sendJson}')
                 threading.Thread.__init__(self)
                 self.daemon = True
                 windowParameterSet.destroy()

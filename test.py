@@ -1,54 +1,23 @@
-from tkinter import *
-import re
+import tkinter as tk
 
-class HoverInfo(Menu):
-    def __init__(self, parent, text, command=None):
-        self._com = command
-        Menu.__init__(self,parent, tearoff=0)
-        if not isinstance(text, str):
-            raise TypeError('Trying to initialise a Hover Menu with a non string type: ' + text.__class__.__name__)
-        toktext=re.split('\n', text)
-        for t in toktext:
-            self.add_command(label = t)
-        self._displayed=False
-        self.master.bind("<Enter>",self.Display )
-        self.master.bind("<Leave>",self.Remove )
+class Example(tk.Frame):
+    def __init__(self, *args, **kwargs):
+        tk.Frame.__init__(self, *args, **kwargs)
+        self.l1 = tk.Label(self, text="Hover over me")
+        self.l2 = tk.Label(self, text="", width=40)
+        self.l1.pack(side="top")
+        self.l2.pack(side="top", fill="x")
 
-    def __del__(self):
-        self.master.unbind("<Enter>")
-        self.master.unbind("<Leave>")
+        self.l1.bind("<Enter>", self.on_enter)
+        self.l1.bind("<Leave>", self.on_leave)
 
-    def Display(self,event):
-       if not self._displayed:
-          self._displayed=True
-          self.post(event.x_root, event.y_root)
-       if self._com != None:
-          self.master.unbind_all("<Return>")
-          self.master.bind_all("<Return>", self.Click)
+    def on_enter(self, event):
+        self.l2.configure(text="Hello world")
 
-    def Remove(self, event):
-        if self._displayed:
-            self._displayed=False
-            self.unpost()
-        if self._com != None:
-            self.unbind_all("<Return>")
+    def on_leave(self, enter):
+        self.l2.configure(text="")
 
-    def Click(self, event):
-        self._com()
-
-from tkinter import *
-class MyApp(Frame):
-   def __init__(self, parent=None):
-      Frame.__init__(self, parent)
-      self.grid()
-      self.lbl = Label(self, text='testing')
-      self.lbl.grid()
-
-      self.hover = HoverInfo(self, 'while hovering press return \n for an exciting msg', self.HelloWorld)
-
-   def HelloWorld(self):
-      print('Hello World')
-
-app = MyApp()
-app.master.title('test')
-app.mainloop()
+if __name__ == "__main__":
+    root = tk.Tk()
+    Example(root).pack(side="top", fill="both", expand="true")
+    root.mainloop()
