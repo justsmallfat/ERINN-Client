@@ -39,7 +39,7 @@ class ParameterSetWindow(tk.Toplevel):
         global rootSendData
 
         global photo
-        photo = tk.PhotoImage(file ='D:/kevin_paper/project/ERINN-Client/question.gif')
+        photo = tk.PhotoImage(file ='./question.gif')
 
         #Tab1
         #row1
@@ -54,7 +54,7 @@ class ParameterSetWindow(tk.Toplevel):
             TrainModelMessage_1.ParameterSetWindow(window)
         btnParameterSet = tk.Button(tab1, image = photo, command=creatMessageView_1)
         btnParameterSet.place(width = 50, height = 50, x = 940, y = 10, anchor = "nw")
-        selectConfigLabel = tk.Label(tab1, text="選擇設定檔:")
+        selectConfigLabel = tk.Label(tab1, text="Select config:")
         selectConfigLabel.grid(row=0, column=0, padx=15, pady=15)
         selectConfigValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         selectConfigComboxlist = ttk.Combobox(tab1, textvariable=selectConfigValue)  # 初始化
@@ -65,7 +65,7 @@ class ParameterSetWindow(tk.Toplevel):
         selectConfigComboxlist.current(0)  # 選擇第一個
         selectConfigComboxlist.bind("<<ComboboxSelected>>",getConfigData)
 
-        selectDataLabel = tk.Label(tab1, text="選擇訓練資料:")
+        selectDataLabel = tk.Label(tab1, text="Select training datas:")
         selectDataLabel.grid(row=0, column=2, padx=15, pady=15)
         selectDataValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         selectDatalist = ttk.Combobox(tab1, textvariable=selectDataValue)  # 初始化
@@ -225,7 +225,7 @@ class ParameterSetWindow(tk.Toplevel):
         #row1
         def creatMessageView_4():
             TrainModelMessage_4.ParameterSetWindow(window)
-        btnParameterSet = tk.Button(tab4, text='？', command=creatMessageView_4)
+        btnParameterSet = tk.Button(tab4, image = photo, command=creatMessageView_4)
         btnParameterSet.place(width = 40, height = 40, x = 950, y = 0, anchor = "nw")
         num_gpuLabel = tk.Label(tab4, text="num_gpu")
         num_gpuLabel.grid(row=0, column=0, padx=15, pady=15)
@@ -315,7 +315,7 @@ class ParameterSetWindow(tk.Toplevel):
             lossValue.set(rootSendData['loss'])
 
 
-        btnSend = tk.Button(tab4, text='傳送參數並訓練模組', command =lambda:Threader())
+        btnSend = tk.Button(tab4, text='Send', command =lambda:Threader())
         btnSend.grid(row=6, column=2, padx=15, pady=15)
 
 

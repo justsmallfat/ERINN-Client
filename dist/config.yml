@@ -1,2 +1,2 @@
-ServerDomainName : 192.168.3.200
+ServerDomainName : 127.0.0.1
 ServerPort : 5000

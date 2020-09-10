@@ -9,7 +9,7 @@ class ParameterSetWindow(tk.Toplevel):
     def __init__(self, window):
         windowParameterSet = tk.Toplevel(window)
         windowParameterSet.geometry('400x300')
-        windowParameterSet.title('參數說明2')
+        windowParameterSet.title('Parameter Description2')
 
         selectConfigLabel = tk.Label(windowParameterSet, text="nx:")
         selectConfigLabel.grid(row=0, column=0, padx=10, pady=10)

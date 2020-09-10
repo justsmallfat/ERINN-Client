@@ -5,7 +5,7 @@ class ParameterSetWindow(tk.Toplevel):
     def __init__(self, window):
         windowParameterSet = tk.Toplevel(window)
         windowParameterSet.geometry('800x750')
-        windowParameterSet.title('參數說明1')
+        windowParameterSet.title('Parameter Description1')
 
         preprocess_generator_generatorLabel = tk.Label(windowParameterSet, text="preprocess_generator_generator")
         preprocess_generator_generatorLabel.grid(row=1, column=0, padx=10, pady=10)

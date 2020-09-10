@@ -10,7 +10,7 @@ class ParameterSetWindow(tk.Toplevel):
     def __init__(self, window):
         windowParameterSet = tk.Toplevel(window)
         windowParameterSet.geometry('1000x750')
-        windowParameterSet.title('進行預測')
+        windowParameterSet.title('PredictResistivity')
 
         tab_parent = ttk.Notebook(windowParameterSet)
         tab_parent.pack(expand=2, fill='both')
@@ -38,7 +38,7 @@ class ParameterSetWindow(tk.Toplevel):
         # btnParameterSet = tk.Button(tab1, text='？', command=creatMessageView_1)
         # btnParameterSet.place(width = 40, height = 40, x = 950, y = 0, anchor = "nw")
 
-        selectDataLabel = tk.Label(tab1, text="選擇測試資料:")
+        selectDataLabel = tk.Label(tab1, text="Select test data:")
         selectDataLabel.grid(row=0, column=0, padx=15, pady=15)
         selectDataValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         selectDatalist = ttk.Combobox(tab1, textvariable=selectDataValue)  # 初始化
@@ -48,7 +48,7 @@ class ParameterSetWindow(tk.Toplevel):
         selectDatalist.grid(row=0, column=1, padx=15, pady=15)
         selectDatalist.current(0)  # 選擇第一個
 
-        selectModelLabel = tk.Label(tab1, text="選擇模組:")
+        selectModelLabel = tk.Label(tab1, text="Select model:")
         selectModelLabel.grid(row=0, column=2, padx=15, pady=15)
         selectModelValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         selectModellist = ttk.Combobox(tab1, textvariable=selectModelValue)  # 初始化
@@ -72,7 +72,7 @@ class ParameterSetWindow(tk.Toplevel):
         predictions_dirEntry.grid(row=1, column=3, padx=15, pady=15)
 
 
-        selectConfigLabel = tk.Label(tab1, text="選擇設定檔:")
+        selectConfigLabel = tk.Label(tab1, text="Select config:")
         selectConfigLabel.grid(row=2, column=0, padx=15, pady=15)
         comvalue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         comboxlist = ttk.Combobox(tab1, textvariable=comvalue)  # 初始化
@@ -89,7 +89,7 @@ class ParameterSetWindow(tk.Toplevel):
         figs_dirEntry.grid(row=3, column=1, sticky=tk.W+tk.E, columnspan=2, padx=10, pady=10)
 
 
-        btnSend = tk.Button(tab1, text='開始測試', command =lambda:Threader())
+        btnSend = tk.Button(tab1, text='Send', command =lambda:Threader())
         btnSend.grid(row=4, column=0, padx=15, pady=15)
 
 
@@ -124,13 +124,7 @@ class ParameterSetWindow(tk.Toplevel):
                 print(headers)
                 print('sendJson:')
                 print(sendJson)
-                # windowParameterSet = tk.Toplevel(window)
-                # windowParameterSet.geometry('160x90')
-                # windowParameterSet.title('模組測試中')
-                # selectConfigLabel = tk.Label(windowParameterSet, text="模組測試中...")
-                # selectConfigLabel.grid(row=0, column=0, padx=15, pady=15)
                 r = requests.post(f'{serverURL}/predictResistivity', headers= headers, data=sendJson)
-                # windowParameterSet.destroy()
 
     def preprocessfun(self):
         return "Hello world."

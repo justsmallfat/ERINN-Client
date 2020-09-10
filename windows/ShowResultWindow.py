@@ -147,7 +147,7 @@ class ParameterSetWindow(tk.Toplevel):
                     Threader(nowIndex,i,j).run()
 
         # selectDataLabel = tk.Label(tab1, image=tk_image, text="qq")
-        selectDataLabel = tk.Label(tab1, text="選擇資料夾:")
+        selectDataLabel = tk.Label(tab1, text="Select folder:")
         selectDataLabel.grid(row=0, column=0, pady=(5, 0), sticky='nw')
 
 
