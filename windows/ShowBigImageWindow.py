@@ -1,5 +1,3 @@
-import math
-from  tkinter import ttk
 import tkinter as tk
 from urllib import parse
 
@@ -10,6 +8,7 @@ import io
 from cffi.backend_ctypes import xrange
 from urllib.request import urlopen
 from PIL import Image, ImageTk
+from tkinter import filedialog
 
 
 class ParameterSetWindow(tk.Toplevel):
@@ -23,7 +22,7 @@ class ParameterSetWindow(tk.Toplevel):
             return pil_image.resize((width, height), Image.ANTIALIAS)
 
         windowParameterSet = tk.Toplevel(window)
-        windowParameterSet.geometry('800x750')
+        windowParameterSet.geometry('800x700')
         windowParameterSet.title(url)
         print(f'ParameterSetWindow {url}')
         data = parse.urlencode(sendData).encode()
@@ -32,6 +31,7 @@ class ParameterSetWindow(tk.Toplevel):
         # internal data file
         data_stream = io.BytesIO(image_bytes)
         # open as a PIL image object
+        global pil_image
         pil_image = Image.open(data_stream)
         # put the image on a typical widget
 
@@ -45,9 +45,33 @@ class ParameterSetWindow(tk.Toplevel):
 
         label = tk.Label(windowParameterSet, image=tk_image, text="qq")
         label.image = tk_image
-        label.grid(row=0, column=0, sticky='news')
+        label.grid(row=0, column=0, rowspan=8, sticky='news')
 
-        # tab_parent.add(tab2, text="PredictResistivity/Inferring_1")
+
+
+        def downloadImage():
+            name = url.rsplit('/', 1)[1]
+            print(name)
+            window.filename =  filedialog.asksaveasfilename(initialfile = f"{name}",title = "Select file", defaultextension = '.png' , filetypes = (("jpeg files","*.jpg"),("png files","*.png"),("all files","*.*")))
+            downloadImageMessageValue.set(window.filename)
+            global pil_image
+            print(pil_image)
+            pil_image.save(f'{window.filename}.png', "PNG")
+            # files = {'file': open(window.filename, 'rb')}
+            # r = requests.post(f'http://{yaml_data["ServerDomainName"]}:{yaml_data["ServerPort"]}/uploadModel'
+            #                   , files =files)
+            # if r.text == 'Success':
+            #     downloadImageMessageValue.set('Upload Success!')
+            # else:
+            #     downloadImageMessageValue.set('Upload Fail!')
+            # print(r.text)
+
+        btnDownloadImage = tk.Button(windowParameterSet, text='Download Image', command=downloadImage)
+        btnDownloadImage.grid(row=0, column=1, padx=10, pady=10)
+        # btnUploadModel.bind("<Enter>", lambda event:showFunctionMessage(event, 'Download the Images.'))
+        downloadImageMessageValue = tk.StringVar(value='Please select dir')
+        # downloadImageLabel = tk.Label(windowParameterSet, textvariable=downloadImageMessageValue)
+        # downloadImageLabel.grid(row=1, column=1, sticky=tk.W, padx=10, pady=10)
 
 
     def preprocessfun(self):
