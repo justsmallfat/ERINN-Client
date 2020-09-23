@@ -45,7 +45,7 @@ class ParameterSetWindow(tk.Toplevel):
         #row1
         def getConfigData(configName):
             global rootSendData
-            tabOneSendData = {'configFileName': selectConfigComboxlist.get()}
+            tabOneSendData = {'configFileDir': 'training', 'configFileName': selectConfigComboxlist.get()}
             r = requests.post(f'{serverURL}/getConfigData', data=tabOneSendData)
             rootSendData = json.loads(r.text)
             loadDataRefreshView(rootSendData)
@@ -58,7 +58,7 @@ class ParameterSetWindow(tk.Toplevel):
         selectConfigLabel.grid(row=0, column=0, padx=15, pady=15)
         selectConfigValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         selectConfigComboxlist = ttk.Combobox(tab1, textvariable=selectConfigValue)  # 初始化
-        r = requests.post(f'{serverURL}/getConfigs')
+        r = requests.post(f'{serverURL}/getTrainingConfigs')
         list = r.text
         selectConfigComboxlist["values"] = list.split(',')
         selectConfigComboxlist.grid(row=0, column=1, padx=15, pady=15)

@@ -103,7 +103,7 @@ class ParameterSetWindow(tk.Toplevel):
 
         def getConfigData(configName):
             global rootSendData
-            tabOneSendData = {'configFileName': comboxlist.get()}
+            tabOneSendData = {'configFileDir': 'generateData','configFileName': comboxlist.get()}
             r = requests.post(f'{serverURL}/getConfigData', data=tabOneSendData)
             print(f"getConfigData : {r.text}")
             rootSendData = json.loads(r.text)
@@ -111,7 +111,7 @@ class ParameterSetWindow(tk.Toplevel):
 
         def getBoardFrame(boardType, scaleType, a, b):
             f = Figure(figsize=(3,3), dpi=50)
-            print(f'boardType = {boardType } a {a} b {b}')
+            # print(f'boardType = {boardType } a {a} b {b}')
 
             x_axis_size = int(abs(b-a+1))
             if x_axis_size<50:
@@ -119,7 +119,7 @@ class ParameterSetWindow(tk.Toplevel):
             # x_axis = linspace(a, b, x_axis_size)
             x_axis = linspace(a, b, x_axis_size)
             if 'normal'==boardType:
-                print(f'normal')
+                # print(f'normal')
                 x_axis = linspace(0, a*2, x_axis_size)
                 if scaleType == 'linear':
                     _a = (0 - a) / b
@@ -133,7 +133,7 @@ class ParameterSetWindow(tk.Toplevel):
                 pyplot = f.add_subplot(111)
                 pyplot.plot(x_axis, y_axis)
             else:
-                print(f'uniform')
+                # print(f'uniform')
                 if a>b:
                     return f
                 pd = uniform(a, b-a)
@@ -146,7 +146,7 @@ class ParameterSetWindow(tk.Toplevel):
             return f
 
         def reLoadView(self):
-            print(f"reLoadView {useHiddenBackgroundValue}")
+            # print(f"reLoadView {useHiddenBackgroundValue}")
             global rootSendData
             tabIndex = 4
             rowIndex = 7
@@ -286,7 +286,7 @@ class ParameterSetWindow(tk.Toplevel):
         selectConfigLabel.grid(row=rowIndex, column=0, padx=15, pady=15)
         comvalue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         comboxlist = ttk.Combobox(tabs[tabIndex]["tab"], textvariable=comvalue)  # 初始化
-        r = requests.post(f'{serverURL}/getConfigs')
+        r = requests.post(f'{serverURL}/getGenerateConfigs')
         list = r.text
         comboxlist["values"] = list.split(',')
         comboxlist.grid(row=rowIndex, column=1, padx=15, pady=15)
@@ -302,7 +302,7 @@ class ParameterSetWindow(tk.Toplevel):
 
         numSamplesLabel = tk.Label(tabs[tabIndex]["tab"], text="num_samples")
         numSamplesLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        numSamplesNum = tk.StringVar(value="50")
+        numSamplesNum = tk.IntVar(value=50)
         numSamplesEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=numSamplesNum)
         numSamplesEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
 
@@ -374,7 +374,7 @@ class ParameterSetWindow(tk.Toplevel):
         NZEntry.grid(row=rowIndex, column=1, padx=15, pady=15)
         zKernelSizeLabel = tk.Label(tabs[tabIndex]["tab"], text="z_kernel_size:")
         zKernelSizeLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
-        zKernelSizeNum = tk.StringVar(value="30")
+        zKernelSizeNum = tk.StringVar(value="3")
         zKernelSizeEntry = tk.Entry(tabs[tabIndex]["tab"], textvariable=zKernelSizeNum)
         zKernelSizeEntry.grid(row=rowIndex, column=3, padx=15, pady=15)
         tab_parent.pack(expand=2, fill='both')

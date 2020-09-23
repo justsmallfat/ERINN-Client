@@ -76,7 +76,7 @@ class ParameterSetWindow(tk.Toplevel):
         selectConfigLabel.grid(row=2, column=0, padx=15, pady=15)
         comvalue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         comboxlist = ttk.Combobox(tab1, textvariable=comvalue)  # 初始化
-        r = requests.post(f'{serverURL}/getConfigs')
+        r = requests.post(f'{serverURL}/getTrainingConfigs')
         list = r.text
         comboxlist["values"] = list.split(',')
         comboxlist.grid(row=2, column=1, padx=15, pady=15)
