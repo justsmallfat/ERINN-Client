@@ -52,77 +52,119 @@ class ParameterSetWindow(tk.Toplevel):
 
         def creatMessageView_1():
             TrainModelMessage_1.ParameterSetWindow(window)
+        nowRow = 0
         btnParameterSet = tk.Button(tab1, image = photo, command=creatMessageView_1)
         btnParameterSet.place(width = 50, height = 50, x = 940, y = 10, anchor = "nw")
         selectConfigLabel = tk.Label(tab1, text="Select config:")
-        selectConfigLabel.grid(row=0, column=0, padx=15, pady=15)
+        selectConfigLabel.grid(row=nowRow, column=0, padx=15, pady=15)
         selectConfigValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         selectConfigComboxlist = ttk.Combobox(tab1, textvariable=selectConfigValue)  # 初始化
         r = requests.post(f'{serverURL}/getTrainingConfigs')
         list = r.text
         selectConfigComboxlist["values"] = list.split(',')
-        selectConfigComboxlist.grid(row=0, column=1, padx=15, pady=15)
+        selectConfigComboxlist.grid(row=nowRow, column=1, padx=15, pady=15)
         selectConfigComboxlist.current(0)  # 選擇第一個
         selectConfigComboxlist.bind("<<ComboboxSelected>>",getConfigData)
 
         selectDataLabel = tk.Label(tab1, text="Select training datas:")
-        selectDataLabel.grid(row=0, column=2, padx=15, pady=15)
+        selectDataLabel.grid(row=nowRow, column=2, padx=15, pady=15)
         selectDataValue = tk.StringVar()  # 窗體自帶的文字，新建一個值
         selectDatalist = ttk.Combobox(tab1, textvariable=selectDataValue)  # 初始化
         r = requests.post(f'{serverURL}/getTrainingDataList')
         list = r.text
         selectDatalist["values"] = list.split(',')
-        selectDatalist.grid(row=0, column=3, padx=15, pady=15)
+        selectDatalist.grid(row=nowRow, column=3, padx=15, pady=15)
         selectDatalist.current(0)  # 選擇第一個
 
+        nowRow = nowRow+1
+        preprocess_generatorLabel = tk.Label(tab1, text="preprocess_generator")
+        preprocess_generatorLabel.grid(row=nowRow, column=0, columnspan=6, padx=15, pady=15, sticky=tk.W)
+
+        nowRow = nowRow+1
         #row2
-        raw_data_dirLabel = tk.Label(tab1, text="raw_data_dir")
-        raw_data_dirLabel.grid(row=1, column=0, padx=15, pady=15)
-        raw_data_dirPath = tk.StringVar(value="../data/raw_data")
-        raw_data_dirEntry = tk.Entry(tab1, textvariable=raw_data_dirPath)
-        raw_data_dirEntry.grid(row=1, column=1, padx=15, pady=15)
+        preprocess_generator_add_noiseLabel = tk.Label(tab1, text="add_noise")
+        preprocess_generator_add_noiseLabel.grid(row=nowRow, column=0, columnspan=2, padx=15, pady=15)
+        preprocess_generator_log_transformLabel = tk.Label(tab1, text="log_transform")
+        preprocess_generator_log_transformLabel.grid(row=nowRow, column=2, columnspan=4, padx=15, pady=15)
 
-        processed_data_dirLabel = tk.Label(tab1, text="processed_data_dir")
-        processed_data_dirLabel.grid(row=1, column=2, padx=15, pady=15)
-        processed_data_dirPath = tk.StringVar(value="../data/processed_data")
-        processed_data_dirEntry = tk.Entry(tab1, textvariable=processed_data_dirPath)
-        processed_data_dirEntry.grid(row=1, column=3, padx=15, pady=15)
-
+        nowRow = nowRow+1
         #row3
-        preprocessLabel = tk.Label(tab1, text="preprocess")
-        preprocessLabel.grid(row=2, column=0, columnspan=6, padx=15, pady=15, sticky=tk.W)
+        preprocess_generator_add_noise_performValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
+        preprocess_generator_c1 = tk.Checkbutton(tab1, text='perform', variable=preprocess_generator_add_noise_performValue, onvalue=1, offvalue=0)
+        preprocess_generator_c1.grid(row=nowRow, column=0, padx=15, pady=15)
+        preprocess_generator_kwargsLabel = tk.Label(tab1, text="kwargs")
+        preprocess_generator_kwargsLabel.grid(row=nowRow, column=1, padx=15, pady=15)
+        preprocess_generator_log_transform_performValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
+        preprocess_generator_c2 = tk.Checkbutton(tab1, text='perform', variable=preprocess_generator_log_transform_performValue, onvalue=1, offvalue=0)
+        preprocess_generator_c2.grid(row=nowRow, column=2, padx=15, pady=15)
+        preprocess_generator_kwargsLabel = tk.Label(tab1, text="kwargs")
+        preprocess_generator_kwargsLabel.grid(row=nowRow, column=3, padx=15, pady=15)
 
+        nowRow = nowRow+1
         #row4
-        add_noiseLabel = tk.Label(tab1, text="add_noise")
-        add_noiseLabel.grid(row=3, column=0, columnspan=2, padx=15, pady=15)
-        log_transformLabel = tk.Label(tab1, text="log_transform")
-        log_transformLabel.grid(row=3, column=2, columnspan=4, padx=15, pady=15)
+        preprocess_generator_selectArrayTypeLabel = tk.Label(tab1, text="ratio")
+        preprocess_generator_selectArrayTypeLabel.grid(row=nowRow, column=1, padx=15, pady=15)
+        preprocess_generator_log_transform_kwargs_inverseValue = tk.BooleanVar()  # 窗體自帶的文字，新建一個值
+        preprocess_generator_c1 = tk.Checkbutton(tab1, text='inverse', variable=preprocess_generator_log_transform_kwargs_inverseValue, onvalue=True, offvalue=False)
+        preprocess_generator_c1.grid(row=nowRow, column=3, padx=15, pady=15)
 
-        #row5
-        preprocess_add_noise_performValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
-        c1 = tk.Checkbutton(tab1, text='perform', variable=preprocess_add_noise_performValue, onvalue=1, offvalue=0)
-        c1.grid(row=4, column=0, padx=15, pady=15)
-        kwargsLabel = tk.Label(tab1, text="kwargs")
-        kwargsLabel.grid(row=4, column=1, padx=15, pady=15)
-        preprocess_log_transform_performValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
-        c2 = tk.Checkbutton(tab1, text='perform', variable=preprocess_log_transform_performValue, onvalue=1, offvalue=0)
-        c2.grid(row=4, column=2, padx=15, pady=15)
-        kwargsLabel = tk.Label(tab1, text="kwargs")
-        kwargsLabel.grid(row=4, column=3, padx=15, pady=15)
+        nowRow = nowRow+1
+        preprocess_generator_add_noise_kwargs_ratioValue = tk.IntVar(value="0.1")  # 窗體自帶的文字，新建一個值
+        preprocess_generator_numKGEntry = tk.Entry(tab1, textvariable=preprocess_generator_add_noise_kwargs_ratioValue)
+        preprocess_generator_numKGEntry.grid(row=nowRow, column=1, padx=15, pady=15)
+        preprocess_generator_log_transform_kwargs_inplaceValue = tk.BooleanVar()  # 窗體自帶的文字，新建一個值
+        preprocess_generator_c1 = tk.Checkbutton(tab1, text='inplace', variable=preprocess_generator_log_transform_kwargs_inplaceValue, onvalue=True, offvalue=False)
+        preprocess_generator_c1.grid(row=nowRow, column=3, padx=15, pady=15)
 
-        #row6
-        selectArrayTypeLabel = tk.Label(tab1, text="ratio")
-        selectArrayTypeLabel.grid(row=5, column=1, padx=15, pady=15)
-        preprocess_log_transform_inverseValue = tk.BooleanVar()  # 窗體自帶的文字，新建一個值
-        c1 = tk.Checkbutton(tab1, text='inverse', variable=preprocess_log_transform_inverseValue, onvalue=True, offvalue=False)
-        c1.grid(row=5, column=3, padx=15, pady=15)
 
-        preprocess_log_transform_inplaceValue = tk.BooleanVar()  # 窗體自帶的文字，新建一個值
-        c1 = tk.Checkbutton(tab1, text='inplace', variable=preprocess_log_transform_inplaceValue, onvalue=True, offvalue=False)
-        c1.grid(row=6, column=3, padx=15, pady=15)
-        preprocess_add_noise_kwargs_ratio_Value = tk.IntVar(value="0.1")  # 窗體自帶的文字，新建一個值
-        numKGEntry = tk.Entry(tab1, textvariable=preprocess_add_noise_kwargs_ratio_Value)
-        numKGEntry.grid(row=6, column=1, padx=15, pady=15)
+        # #row2
+        # raw_data_dirLabel = tk.Label(tab1, text="raw_data_dir")
+        # raw_data_dirLabel.grid(row=1, column=0, padx=15, pady=15)
+        # raw_data_dirPath = tk.StringVar(value="../data/raw_data")
+        # raw_data_dirEntry = tk.Entry(tab1, textvariable=raw_data_dirPath)
+        # raw_data_dirEntry.grid(row=1, column=1, padx=15, pady=15)
+        #
+        # processed_data_dirLabel = tk.Label(tab1, text="processed_data_dir")
+        # processed_data_dirLabel.grid(row=1, column=2, padx=15, pady=15)
+        # processed_data_dirPath = tk.StringVar(value="../data/processed_data")
+        # processed_data_dirEntry = tk.Entry(tab1, textvariable=processed_data_dirPath)
+        # processed_data_dirEntry.grid(row=1, column=3, padx=15, pady=15)
+        #
+        # #row3
+        # preprocessLabel = tk.Label(tab1, text="preprocess")
+        # preprocessLabel.grid(row=2, column=0, columnspan=6, padx=15, pady=15, sticky=tk.W)
+        #
+        # #row4
+        # add_noiseLabel = tk.Label(tab1, text="add_noise")
+        # add_noiseLabel.grid(row=3, column=0, columnspan=2, padx=15, pady=15)
+        # log_transformLabel = tk.Label(tab1, text="log_transform")
+        # log_transformLabel.grid(row=3, column=2, columnspan=4, padx=15, pady=15)
+        #
+        # #row5
+        # preprocess_add_noise_performValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
+        # c1 = tk.Checkbutton(tab1, text='perform', variable=preprocess_add_noise_performValue, onvalue=1, offvalue=0)
+        # c1.grid(row=4, column=0, padx=15, pady=15)
+        # kwargsLabel = tk.Label(tab1, text="kwargs")
+        # kwargsLabel.grid(row=4, column=1, padx=15, pady=15)
+        # preprocess_log_transform_performValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
+        # c2 = tk.Checkbutton(tab1, text='perform', variable=preprocess_log_transform_performValue, onvalue=1, offvalue=0)
+        # c2.grid(row=4, column=2, padx=15, pady=15)
+        # kwargsLabel = tk.Label(tab1, text="kwargs")
+        # kwargsLabel.grid(row=4, column=3, padx=15, pady=15)
+        #
+        # #row6
+        # selectArrayTypeLabel = tk.Label(tab1, text="ratio")
+        # selectArrayTypeLabel.grid(row=5, column=1, padx=15, pady=15)
+        # preprocess_log_transform_inverseValue = tk.BooleanVar()  # 窗體自帶的文字，新建一個值
+        # c1 = tk.Checkbutton(tab1, text='inverse', variable=preprocess_log_transform_inverseValue, onvalue=True, offvalue=False)
+        # c1.grid(row=5, column=3, padx=15, pady=15)
+        #
+        # preprocess_log_transform_inplaceValue = tk.BooleanVar()  # 窗體自帶的文字，新建一個值
+        # c1 = tk.Checkbutton(tab1, text='inplace', variable=preprocess_log_transform_inplaceValue, onvalue=True, offvalue=False)
+        # c1.grid(row=6, column=3, padx=15, pady=15)
+        # preprocess_add_noise_kwargs_ratio_Value = tk.IntVar(value="0.1")  # 窗體自帶的文字，新建一個值
+        # numKGEntry = tk.Entry(tab1, textvariable=preprocess_add_noise_kwargs_ratio_Value)
+        # numKGEntry.grid(row=6, column=1, padx=15, pady=15)
 
         #Tab2
         #row1
@@ -188,37 +230,37 @@ class ParameterSetWindow(tk.Toplevel):
         preprocess_generatorLabel = tk.Label(tab3, text="preprocess_generator")
         preprocess_generatorLabel.grid(row=0, column=0, columnspan=6, padx=15, pady=15, sticky=tk.W)
 
-        #row2
-        preprocess_generator_add_noiseLabel = tk.Label(tab3, text="add_noise")
-        preprocess_generator_add_noiseLabel.grid(row=1, column=0, columnspan=2, padx=15, pady=15)
-        preprocess_generator_log_transformLabel = tk.Label(tab3, text="log_transform")
-        preprocess_generator_log_transformLabel.grid(row=1, column=2, columnspan=4, padx=15, pady=15)
-
-        #row3
-        preprocess_generator_add_noise_performValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
-        preprocess_generator_c1 = tk.Checkbutton(tab3, text='perform', variable=preprocess_generator_add_noise_performValue, onvalue=1, offvalue=0)
-        preprocess_generator_c1.grid(row=2, column=0, padx=15, pady=15)
-        preprocess_generator_kwargsLabel = tk.Label(tab3, text="kwargs")
-        preprocess_generator_kwargsLabel.grid(row=2, column=1, padx=15, pady=15)
-        preprocess_generator_log_transform_performValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
-        preprocess_generator_c2 = tk.Checkbutton(tab3, text='perform', variable=preprocess_generator_log_transform_performValue, onvalue=1, offvalue=0)
-        preprocess_generator_c2.grid(row=2, column=2, padx=15, pady=15)
-        preprocess_generator_kwargsLabel = tk.Label(tab3, text="kwargs")
-        preprocess_generator_kwargsLabel.grid(row=2, column=3, padx=15, pady=15)
-
-        #row4
-        preprocess_generator_selectArrayTypeLabel = tk.Label(tab3, text="ratio")
-        preprocess_generator_selectArrayTypeLabel.grid(row=3, column=1, padx=15, pady=15)
-        preprocess_generator_log_transform_kwargs_inverseValue = tk.BooleanVar()  # 窗體自帶的文字，新建一個值
-        preprocess_generator_c1 = tk.Checkbutton(tab3, text='inverse', variable=preprocess_generator_log_transform_kwargs_inverseValue, onvalue=True, offvalue=False)
-        preprocess_generator_c1.grid(row=3, column=3, padx=15, pady=15)
-
-        preprocess_generator_add_noise_kwargs_ratioValue = tk.IntVar(value="0.1")  # 窗體自帶的文字，新建一個值
-        preprocess_generator_numKGEntry = tk.Entry(tab3, textvariable=preprocess_generator_add_noise_kwargs_ratioValue)
-        preprocess_generator_numKGEntry.grid(row=4, column=1, padx=15, pady=15)
-        preprocess_generator_log_transform_kwargs_inplaceValue = tk.BooleanVar()  # 窗體自帶的文字，新建一個值
-        preprocess_generator_c1 = tk.Checkbutton(tab3, text='inplace', variable=preprocess_generator_log_transform_kwargs_inplaceValue, onvalue=True, offvalue=False)
-        preprocess_generator_c1.grid(row=4, column=3, padx=15, pady=15)
+        # #row2
+        # preprocess_generator_add_noiseLabel = tk.Label(tab3, text="add_noise")
+        # preprocess_generator_add_noiseLabel.grid(row=1, column=0, columnspan=2, padx=15, pady=15)
+        # preprocess_generator_log_transformLabel = tk.Label(tab3, text="log_transform")
+        # preprocess_generator_log_transformLabel.grid(row=1, column=2, columnspan=4, padx=15, pady=15)
+        #
+        # #row3
+        # preprocess_generator_add_noise_performValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
+        # preprocess_generator_c1 = tk.Checkbutton(tab3, text='perform', variable=preprocess_generator_add_noise_performValue, onvalue=1, offvalue=0)
+        # preprocess_generator_c1.grid(row=2, column=0, padx=15, pady=15)
+        # preprocess_generator_kwargsLabel = tk.Label(tab3, text="kwargs")
+        # preprocess_generator_kwargsLabel.grid(row=2, column=1, padx=15, pady=15)
+        # preprocess_generator_log_transform_performValue = tk.IntVar()  # 窗體自帶的文字，新建一個值
+        # preprocess_generator_c2 = tk.Checkbutton(tab3, text='perform', variable=preprocess_generator_log_transform_performValue, onvalue=1, offvalue=0)
+        # preprocess_generator_c2.grid(row=2, column=2, padx=15, pady=15)
+        # preprocess_generator_kwargsLabel = tk.Label(tab3, text="kwargs")
+        # preprocess_generator_kwargsLabel.grid(row=2, column=3, padx=15, pady=15)
+        #
+        # #row4
+        # preprocess_generator_selectArrayTypeLabel = tk.Label(tab3, text="ratio")
+        # preprocess_generator_selectArrayTypeLabel.grid(row=3, column=1, padx=15, pady=15)
+        # preprocess_generator_log_transform_kwargs_inverseValue = tk.BooleanVar()  # 窗體自帶的文字，新建一個值
+        # preprocess_generator_c1 = tk.Checkbutton(tab3, text='inverse', variable=preprocess_generator_log_transform_kwargs_inverseValue, onvalue=True, offvalue=False)
+        # preprocess_generator_c1.grid(row=3, column=3, padx=15, pady=15)
+        #
+        # preprocess_generator_add_noise_kwargs_ratioValue = tk.IntVar(value="0.1")  # 窗體自帶的文字，新建一個值
+        # preprocess_generator_numKGEntry = tk.Entry(tab3, textvariable=preprocess_generator_add_noise_kwargs_ratioValue)
+        # preprocess_generator_numKGEntry.grid(row=4, column=1, padx=15, pady=15)
+        # preprocess_generator_log_transform_kwargs_inplaceValue = tk.BooleanVar()  # 窗體自帶的文字，新建一個值
+        # preprocess_generator_c1 = tk.Checkbutton(tab3, text='inplace', variable=preprocess_generator_log_transform_kwargs_inplaceValue, onvalue=True, offvalue=False)
+        # preprocess_generator_c1.grid(row=4, column=3, padx=15, pady=15)
 
 
         #Tab4
@@ -284,13 +326,19 @@ class ParameterSetWindow(tk.Toplevel):
             print(rootSendData)
 
             #tab1
-            raw_data_dirPath.set(rootSendData['raw_data_dir'])
-            processed_data_dirPath.set(rootSendData['processed_data_dir'])
-            preprocess_add_noise_performValue.set(rootSendData['preprocess']['add_noise']['perform'])
-            preprocess_add_noise_kwargs_ratio_Value.set(rootSendData['preprocess']['add_noise']['kwargs']['ratio'])
-            preprocess_log_transform_performValue.set(rootSendData['preprocess']['log_transform']['perform'])
-            preprocess_log_transform_inverseValue.set(rootSendData['preprocess']['log_transform']['kwargs']['inverse'])
-            preprocess_log_transform_inplaceValue.set(rootSendData['preprocess']['log_transform']['kwargs']['inplace'])
+            # raw_data_dirPath.set(rootSendData['raw_data_dir'])
+            # processed_data_dirPath.set(rootSendData['processed_data_dir'])
+            # preprocess_add_noise_performValue.set(rootSendData['preprocess']['add_noise']['perform'])
+            # preprocess_add_noise_kwargs_ratio_Value.set(rootSendData['preprocess']['add_noise']['kwargs']['ratio'])
+            # preprocess_log_transform_performValue.set(rootSendData['preprocess']['log_transform']['perform'])
+            # preprocess_log_transform_inverseValue.set(rootSendData['preprocess']['log_transform']['kwargs']['inverse'])
+            # preprocess_log_transform_inplaceValue.set(rootSendData['preprocess']['log_transform']['kwargs']['inplace'])
+
+            preprocess_generator_add_noise_performValue.set(rootSendData['preprocess_generator']['add_noise']['perform'])
+            preprocess_generator_add_noise_kwargs_ratioValue.set(rootSendData['preprocess_generator']['add_noise']['kwargs']['ratio'])
+            preprocess_generator_log_transform_performValue.set(rootSendData['preprocess_generator']['log_transform']['perform'])
+            preprocess_generator_log_transform_kwargs_inverseValue.set(rootSendData['preprocess_generator']['log_transform']['kwargs']['inverse'])
+            preprocess_generator_log_transform_kwargs_inplaceValue.set(rootSendData['preprocess_generator']['log_transform']['kwargs']['inplace'])
 
             #tab2
             custom_NNPath.set(rootSendData['custom_NN'])
@@ -300,11 +348,7 @@ class ParameterSetWindow(tk.Toplevel):
             pre_trained_weightsVar.set(rootSendData['pre_trained_weights'])
 
             #tab3
-            preprocess_generator_add_noise_performValue.set(rootSendData['preprocess_generator']['add_noise']['perform'])
-            preprocess_generator_add_noise_kwargs_ratioValue.set(rootSendData['preprocess_generator']['add_noise']['kwargs']['ratio'])
-            preprocess_generator_log_transform_performValue.set(rootSendData['preprocess_generator']['log_transform']['perform'])
-            preprocess_generator_log_transform_kwargs_inverseValue.set(rootSendData['preprocess_generator']['log_transform']['kwargs']['inverse'])
-            preprocess_generator_log_transform_kwargs_inplaceValue.set(rootSendData['preprocess_generator']['log_transform']['kwargs']['inplace'])
+
 
             #tab4
             num_gpuValue.set(rootSendData['num_gpu'])
@@ -332,8 +376,8 @@ class ParameterSetWindow(tk.Toplevel):
                 rootSendData.update({'newConfigFileName': configNameEntry.get()})
                 rootSendData.update({'trainingStop': 'false'})
                 rootSendData.update({'predictStop': 'false'})
-                rootSendData.update({'raw_data_dir': raw_data_dirEntry.get()})
-                rootSendData.update({'processed_data_dir': processed_data_dirEntry.get()})
+                # rootSendData.update({'raw_data_dir': raw_data_dirEntry.get()})
+                # rootSendData.update({'processed_data_dir': processed_data_dirEntry.get()})
                 rootSendData.update({'dataset_dir': "../data/"+selectDatalist.get()})
 
                 rootSendData.update(
@@ -343,7 +387,7 @@ class ParameterSetWindow(tk.Toplevel):
                              'kwargs': {
                                  'ratio':preprocess_generator_add_noise_kwargs_ratioValue.get()}},
                           'log_transform':{
-                              'perform': preprocess_log_transform_performValue.get(),
+                              'perform': preprocess_generator_log_transform_performValue.get(),
                               'kwargs': {
                                   'inverse':preprocess_generator_log_transform_kwargs_inverseValue.get(),
                                   'inplace':preprocess_generator_log_transform_kwargs_inplaceValue.get()}}
@@ -351,20 +395,20 @@ class ParameterSetWindow(tk.Toplevel):
                     }
                 )
 
-                rootSendData.update(
-                    {'preprocess':
-                         {'add_noise':{
-                             'perform': preprocess_add_noise_performValue.get(),
-                             'kwargs': {
-                                 'ratio':preprocess_add_noise_kwargs_ratio_Value.get()}},
-                          'log_transform':{
-                              'perform': preprocess_generator_log_transform_performValue.get(),
-                              'kwargs': {
-                                  'inverse':preprocess_log_transform_inverseValue.get(),
-                                  'inplace':preprocess_log_transform_inplaceValue.get()}}
-                         }
-                    }
-                )
+                # rootSendData.update(
+                #     {'preprocess':
+                #          {'add_noise':{
+                #              'perform': preprocess_add_noise_performValue.get(),
+                #              'kwargs': {
+                #                  'ratio':preprocess_add_noise_kwargs_ratio_Value.get()}},
+                #           'log_transform':{
+                #               'perform': preprocess_generator_log_transform_performValue.get(),
+                #               'kwargs': {
+                #                   'inverse':preprocess_log_transform_inverseValue.get(),
+                #                   'inplace':preprocess_log_transform_inplaceValue.get()}}
+                #          }
+                #     }
+                # )
 
                 rootSendData.update({'custom_NN': f"<module 'my_model' from '../config/{custom_NNPathValue.get()}'>"})
                 rootSendData.update({'train_dir': train_dirEntry.get()})
