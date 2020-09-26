@@ -109,8 +109,9 @@ class ParameterSetWindow(tk.Toplevel):
             rootSendData = json.loads(r.text)
             loadDataRefreshView()
 
+        frameDpi = 45
         def getBoardFrame(boardType, scaleType, a, b):
-            f = Figure(figsize=(3,3), dpi=50)
+            f = Figure(figsize=(3,3), dpi=frameDpi)
             # print(f'boardType = {boardType } a {a} b {b}')
 
             x_axis_size = int(abs(b-a+1))
@@ -131,7 +132,7 @@ class ParameterSetWindow(tk.Toplevel):
                     raise ValueError('You did not input enough or correct keyword argument.')
                 y_axis = pd.pdf(x_axis)
                 pyplot = f.add_subplot(111)
-                pyplot.plot(x_axis, y_axis)
+                pyplot.plot(x_axis, y_axis, label = boardType)
             else:
                 # print(f'uniform')
                 if a>b:
@@ -139,7 +140,7 @@ class ParameterSetWindow(tk.Toplevel):
                 pd = uniform(a, b-a)
                 y_axis = pd.pdf(x_axis)
                 pyplot = f.add_subplot(111)
-                pyplot.plot(x_axis, y_axis)
+                pyplot.plot(x_axis, y_axis, label = boardType)
                 r = pd.rvs(size=x_axis_size)
                 pyplot.hist(r, density=True, histtype='stepfilled', alpha=0.2)
                 pyplot.legend(loc='best', frameon=False)
@@ -194,7 +195,7 @@ class ParameterSetWindow(tk.Toplevel):
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=rowIndex, column=1, padx=5, pady=5)
             else:
-                f = Figure(figsize=(3,3), dpi=50)
+                f = Figure(figsize=(3,3), dpi=frameDpi)
                 canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=rowIndex, column=1, padx=5, pady=5)
@@ -206,7 +207,7 @@ class ParameterSetWindow(tk.Toplevel):
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=rowIndex, column=2, padx=5, pady=5)
             else:
-                f = Figure(figsize=(3,3), dpi=50)
+                f = Figure(figsize=(3,3), dpi=frameDpi)
                 canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=rowIndex, column=2, padx=5, pady=5)
@@ -218,7 +219,7 @@ class ParameterSetWindow(tk.Toplevel):
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=rowIndex, column=3, padx=5, pady=5)
             else:
-                f = Figure(figsize=(3,3), dpi=50)
+                f = Figure(figsize=(3,3), dpi=frameDpi)
                 canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=rowIndex, column=3, padx=5, pady=5)
@@ -235,7 +236,7 @@ class ParameterSetWindow(tk.Toplevel):
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=rowIndex, column=1, padx=5, pady=5)
             else:
-                f = Figure(figsize=(3,3), dpi=50)
+                f = Figure(figsize=(3,3), dpi=frameDpi)
                 canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=rowIndex, column=1, padx=5, pady=5)
@@ -247,19 +248,19 @@ class ParameterSetWindow(tk.Toplevel):
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=rowIndex, column=2, padx=5, pady=5)
             else:
-                f = Figure(figsize=(3,3), dpi=50)
+                f = Figure(figsize=(3,3), dpi=frameDpi)
                 canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=rowIndex, column=2, padx=5, pady=5)
                 messageLabel = tk.Label(tabs[tabIndex]["tab"], text="No use")
                 messageLabel.grid(row=rowIndex, column=2, padx=15, pady=15)
             if useHiddencircleValue.get():
-                f = getBoardFrame(hidden_pdf_circleValue.get(), scale_circleValue.get(), hidden_b_for_a_circleNum.get(), hidden_b_for_b_circleNum.get())
+                f = getBoardFrame(hidden_pdf_circleValue.get(), scale_circleValue.get(), hidden_a_for_b_circleNum.get(), hidden_b_for_b_circleNum.get())
                 canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=rowIndex, column=3, padx=5, pady=5)
             else:
-                f = Figure(figsize=(3,3), dpi=50)
+                f = Figure(figsize=(3,3), dpi=frameDpi)
                 canvas = FigureCanvasTkAgg(f, tabs[tabIndex]["tab"])
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=rowIndex, column=3, padx=5, pady=5)

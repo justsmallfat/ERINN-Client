@@ -9,7 +9,7 @@ import yaml
 class ParameterSetWindow(tk.Toplevel):
     def __init__(self, window):
         windowParameterSet = tk.Toplevel(window)
-        windowParameterSet.geometry('1000x750')
+        windowParameterSet.geometry('800x300')
         windowParameterSet.title('PredictResistivity')
 
         tab_parent = ttk.Notebook(windowParameterSet)
