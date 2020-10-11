@@ -27,6 +27,7 @@ global predictProgressValue
 global timer
 global intervalTime
 global functionMsgFrame
+global versionStr
 functionMsgFrame = tk.Frame(window)
 intervalTime = 30
 timeout = 5
@@ -168,6 +169,16 @@ def saveConfig():
 mainWindowTimer = perpetualTimer(intervalTime, getProgressData)
 def initTimmer():
     getProgressData()
+    try:
+        r = requests.post(f'http://{yaml_data["ServerDomainName"]}:{yaml_data["ServerPort"]}/getServerVersion'
+                              , headers = {'Content-Type': 'application/json'}
+                              , timeout = timeout)
+        global versionStr
+        versionStr = tk.StringVar(value=f'{CLIENT_VERSION}({r.text})')
+        print(r.text)
+    except Exception as e:
+        errorMessageText.insert(1.0,"ReadConfigError")
+        print(f"ReadConfigError {e}")
     global mainWindowTimer
     mainWindowTimer.cancel()
     mainWindowTimer = perpetualTimer(intervalTime, getProgressData)
@@ -190,7 +201,6 @@ except OSError as e:
 except Exception as e:
     errorMessageText.insert(1.0,"ReadConfigError")
     print(f"ReadConfigError {e}")
-
 versionStr = tk.StringVar(value=f'{CLIENT_VERSION}()')
 try:
     r = requests.post(f'http://{yaml_data["ServerDomainName"]}:{yaml_data["ServerPort"]}/getServerVersion'
